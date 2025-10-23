@@ -1,0 +1,170 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import "tailwindcss";
+@import "tailwindcss-primeui";
+@import "primeicons/primeicons.css";
+
+@theme {
+    --primary-50: '#CCAAEE';
+    --primary-100: '#C298EB';
+    --primary-200: '#AD76E4';
+    --primary-300: '#9954DD';
+    --primary-400: '#8432D6';
+    --primary-500: '#7025BB';
+    --primary-600: '#541C8C';
+    --primary-700: '#38125D';
+    --primary-800: '#1C092E';
+    --primary-900: '#000000';
+    --primary-950: '#000000';
+    --secondary-50: ' #7E7E7E';
+    --secondary-100: ' #747474';
+    --secondary-200: ' #5F5F5F';
+    --secondary-300: '#4B4B4B';
+    --secondary-400: '#363636';
+    --secondary-500: '#222222';
+    --secondary-600: '#060606';
+    --secondary-700: '#060606';
+    --secondary-800: '#000000';
+    --secondary-800: '#000000';
+    --secondary-900: '#000000';
+    --secondary-950: '#000000';
+
+    --ease-in-expo: cubic-bezier(0.95, 0.05, 0.795, 0.035); 
+}
+
+
+* {
+    box-sizing: border-box;
+    font-family: Roboto;
+    scroll-behavior: smooth;
+
+    scrollbar-width: thin;
+    scrollbar-color: #5c5c5c transparent;
+}
+
+html,
+body {
+  overflow-x: hidden;
+  /* ... your other styles ... */
+}
+
+/* --- Global Stylesheet or style block in create.vue --- */
+
+/* Style the main container/dropdown box */
+.pac-container {
+    width: 100%;
+    margin-top: 5px;
+    background-color: white; /* Light background */
+    z-index: 10000 !important; /* Ensure it floats above modals/other elements */
+    padding: 5;
+    border-radius: 0.5rem;
+}
+
+.pac-item {
+    font-size: 14px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.pac-item-selected {
+    background-color: #e9ecef; /* Light gray background for hover */
+    color: #000;
+}
+
+.pac-item .pac-icon {
+    /* Hide the default Google Maps icon if you don't want it */
+    display: none; 
+}
+
+/* Style the bold part of the suggestion (what the user typed) */
+.pac-item span:first-child {
+    font-weight: 600;
+    color: #333;
+}
+
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.02s ease-in-out forwards;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.fade-out {
+  animation: fadeOut 0.2s ease-in-out forwards;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: 0.2s ease-in-out;
+}
+
+/* start/end states */
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* default visible state */
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
+}
+
+/* LOCOMOTIVE SCROLL */
+.gradient_background {
+background: #ffdef2;
+background: linear-gradient(91deg,rgba(255, 222, 242, 1) 4%, rgba(240, 240, 240, 1) 96%);
+}
+
+.gradient_background2 {
+  background: #ffdef2;
+  background: linear-gradient(210deg, rgba(255, 222, 242, 1) 4%, rgba(240, 240, 240, 1) 96%);
+}
+
+.polka_background {
+  background-color: #e5e5f7;
+  opacity: 0.8;
+  background-image: radial-gradient(#9954DD 2px, #e5e5f7 2px);
+  background-size: 40px 40px;
+  background-attachment: fixed;
+}
+
+::-webkit-scrollbar {
+    width: 6px; 
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #5c5c5c; 
+    border-radius: 4px;
+}
+
+.text-shadow {
+  text-shadow: 5px 5px 0 #74279a;
+}
+
+.text-shadow2 {
+  text-shadow: 2px 2px 10px #2e2d2d;
+}
+
+/* #424242; */
