@@ -14,7 +14,7 @@
     <div class="hidden md:block w-25 h-full flex-shrink-0 fixed z-10">
       <Navbar />
     </div>
-    <main class="flex-1">
+    <main class="">
       <router-view />
     </main>
     

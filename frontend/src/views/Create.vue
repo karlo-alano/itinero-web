@@ -204,8 +204,8 @@ onMounted(() => {
 
 <template>
 
-  <div class="h-screen w-screen p-4 md:p-15 flex flex-col justify-center items-center">
-    <Stepper value=1 linear class="md:w-[70%] h-full mt-25 md:mt-10 !z-1">
+  <div class="h-[100dvh] w-full p-4 md:p-20 flex flex-col justify-center items-center overflow-hidden">
+    <Stepper value=1 linear class="md:w-[70%] h-full mt-15 md:mt-10 !z-1">
         <StepList>
             <Step value="1">Location</Step>
             <Step value="2">Time</Step>
@@ -308,3 +308,6 @@ onMounted(() => {
     </Stepper>
   </div>
 </template>
+
+<style scoped>
+</style>
