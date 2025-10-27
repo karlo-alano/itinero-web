@@ -13,6 +13,7 @@ import Create from '@/views/Create.vue'
 import LoadingScreen from '@/views/LoadingScreen.vue'
 import Explore from '@/views/Explore.vue'
 import Registration from '@/views/Registration.vue'
+import Blog from '@/views/Blog.vue'
 
 const routes = [
     {
@@ -22,7 +23,9 @@ const routes = [
             {path: '', name: 'Home', component: Home},
             {path: '/Create', name: 'Create', component: Create},
             {path: '/Loading', name: 'Loading', component: LoadingScreen},
-            {path: '/Explore', name: 'Explore', component: Explore}
+            {path: '/Explore', name: 'Explore', component: Explore},
+            {path: '/Blog', name: 'Blog', component: Blog},
+            {path: 'Registration', name: 'Registration', component: Registration}
         ]
     },
     {
@@ -31,9 +34,6 @@ const routes = [
         children: [
             {path: '', name: 'Dashboard', component: Dashboard}
         ]
-    },
-    {
-        path: '/Register', name: 'Register', component: Registration
     }
 ]
 

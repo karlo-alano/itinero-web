@@ -146,6 +146,8 @@ background: linear-gradient(91deg,rgba(255, 222, 242, 1) 4%, rgba(240, 240, 240,
   background-attachment: fixed;
 }
 
+
+
 ::-webkit-scrollbar {
     width: 6px; 
     height: 6px;
@@ -165,6 +167,38 @@ background: linear-gradient(91deg,rgba(255, 222, 242, 1) 4%, rgba(240, 240, 240,
 
 .text-shadow2 {
   text-shadow: 2px 2px 10px #2e2d2d;
+}
+
+.gradient_background3 {
+  background: linear-gradient(302deg, rgba(255, 228, 230, 1) 25%, rgba(252, 231, 243, 1) 100%);}
+
+@layer utilities {
+  .gradient_background4 {
+    position: relative;
+    background: linear-gradient(302deg, rgba(255, 228, 230, 1) 25%, rgba(252, 231, 243, 1) 100%);
+    overflow: hidden;
+  }
+
+  .gradient_background4::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      60deg,rgb(247, 149, 51),rgb(243, 112, 85),rgb(239, 78, 123),rgb(161, 102, 171),rgb(80, 115, 184),rgb(16, 152, 173),rgb(7, 179, 155),rgb(111, 186, 130)
+    );
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    z-index: 0;
+  }
+
+  .gradient_background4:hover::after {
+    opacity: 1;
+  }
+
+  .gradient_background4 > * {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 /* #424242; */

@@ -34,8 +34,8 @@ const isLoggedIn = false;
       </nav>
 
        -->
-      <nav class="p-2 bg-transparent">
-        <div class="bg-pink-100 w-13 h-[98dvh] drop-shadow-2xl flex flex-col p-2 rounded-xl">
+      <nav class="p-4 flex justify-center items-center h-screen">
+        <div class="bg-white w-13 h-full drop-shadow-2xl flex flex-col p-2 rounded-xl">
            <router-link to="/" class="h-10 flex items-center px-4 hover:opacity-80 transition duration-150">
                <img src="@/assets/imgs/Itinero_standalone.svg" alt="Logo" class="h-10 w-10 scale-900"/>
            </router-link>
@@ -44,11 +44,11 @@ const isLoggedIn = false;
              <div class="flex flex-col gap-2">
               <Button icon="pi pi-plus" rounded class="bg-transparent border-0 text-black font-bold hover:bg-slate-300 transition-all duration-250 ease-in-out hover:rotate-45" @click="createAndRefresh"/>
               <Button icon="pi pi-compass" rounded class="bg-transparent border-0 text-black hover:bg-slate-300 transition-all duration-250 ease-in-out hover:rotate-45" @click="router.push('/Explore')"/>
-              <Button icon="pi pi-book" rounded class="bg-transparent border-0 text-black hover:bg-slate-300 transition-all duration-250 ease-in-out hover:rotate-45"/>
+              <Button icon="pi pi-book" rounded class="bg-transparent border-0 text-black hover:bg-slate-300 transition-all duration-250 ease-in-out hover:rotate-45" @click="router.push('/Blog')"/>
               <Button icon="pi pi-cog" rounded class="bg-transparent border-0 text-black hover:bg-slate-300 transition-all duration-250 ease-in-out hover:rotate-45"/>
              </div>
              <div>
-              <Button icon="pi pi-user" rounded class="bg-transparent border-0 text-black hover:bg-slate-300 transition-all duration-250 ease-in-out hover:rotate-45" @click="router.push('/Register')"/>
+              <Button icon="pi pi-user" rounded class="bg-transparent border-0 text-black hover:bg-slate-300 transition-all duration-250 ease-in-out hover:rotate-45" @click="router.push('/Registration')"/>
              </div>
            </div>
           </div>

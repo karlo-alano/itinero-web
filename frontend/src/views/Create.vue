@@ -109,7 +109,7 @@ const availableTags = ref([
     { id: 3, name: 'Museums', icon:'museum', type: 'museum'},
     { id: 4, name: 'Churches', icon:'church', type: 'church'},
     { id: 5, name: 'Parks', icon:'park', type: 'park'},
-    { id: 6, name: 'Cool Buildings', icon:'attractions', type: 'tourist_attraction'},
+    { id: 6, name: 'Attractions', icon:'attractions', type: 'tourist_attraction'},
 ]);
 
 ////SE
@@ -204,15 +204,15 @@ onMounted(() => {
 
 <template>
 
-  <div class="h-[100dvh] w-full p-4 md:p-20 flex flex-col justify-center items-center overflow-hidden">
+  <div class="h-[100dvh] w-full p-4 md:p-20 flex flex-col justify-center items-center overflow-hidden bg-slate-50">
     <Stepper value=1 linear class="md:w-[70%] h-full mt-15 md:mt-10 !z-1">
         <StepList>
             <Step value="1">Location</Step>
             <Step value="2">Time</Step>
             <Step value="3">Interests</Step>
         </StepList>
-        <StepPanels class="h-[80%]">
-            <StepPanel v-slot="{ activateCallback }" value="1" class="flex flex-col h-full ">
+        <StepPanels class="h-[80%] bg-slate-50">
+            <StepPanel v-slot="{ activateCallback }" value="1" class="flex flex-col h-full bg-slate-50">
                 <div class="md:mb-0 w-full md:w-[60%]">
                     <h1 class="text-2xl md: 4xl font-bold font-[Poppins] text-center md:text-left">
                         Where are you starting and where do you want to end your journey?

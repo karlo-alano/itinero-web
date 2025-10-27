@@ -11,7 +11,7 @@
     <!-- Page content -->
 
 
-    <div class="hidden md:block w-25 h-full flex-shrink-0 fixed z-10">
+    <div class="hidden md:block w-18 h-screen flex-shrink-0 fixed z-10">
       <Navbar />
     </div>
     <main class="">

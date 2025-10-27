@@ -17,7 +17,7 @@ app = Flask(__name__)
 CORS(app, origins=[
     "https://itinero.site",
     "https://www.itinero.site",
-    "https://api.itinero.site", # <--- Your Render service will use this
+    "https://api.itinero.site",
     "https://itinero-web.vercel.app" 
 ])
 
@@ -180,7 +180,7 @@ def trace_distance(results):
         print(f"External API request failed: {e}")
         return (
         {"error": "External API request failed", "details": str(e)},
-        [[float('inf')]],  # placeholder 2D list
+        [[float('inf')]], 
         [[float('inf')]]
     )
     
@@ -208,7 +208,7 @@ def trace_distance(results):
         matrixResultsArray.append({
             "origin_index": place.get('originIndex'),
             "destination_index": destination_index,
-            "place_name": place_info['displayName']['text'],
+            "place_name": place_info['displayName']['text'],    
             "destination_id": place_info.get('id'),
             "distance_meters": distance_value,
             "duration_seconds": duration_value,
@@ -272,10 +272,10 @@ def nearest_neighbor(distanceMatrix,durationsMatrix):
 
 
 TYPE_PARAMETERS = {
-    "restaurant":  {"multiplier": 1.5, "min_duration": 45},  # Highly flexible, needs min 45 min
-    "cafe":        {"multiplier": 1.2, "min_duration": 30},  # Flexible, min 30 min
-    "museum":      {"multiplier": 0.8, "min_duration": 60},  # Less flexible, high min 1 hour
-    "park":        {"multiplier": 1.0, "min_duration": 20},  # Standard
+    "restaurant":  {"multiplier": 1.5, "min_duration": 45},  
+    "cafe":        {"multiplier": 1.2, "min_duration": 30}, 
+    "museum":      {"multiplier": 0.8, "min_duration": 60},  
+    "park":        {"multiplier": 1.0, "min_duration": 20},  
     "church":       {"multiplier": 1.1, "min_duration": 30},
     "tourist_attraction": {"multiplier": 1.0, "min_duration": 30},
     "Start": {"multiplier": 1.0, "min_duration": 0},
@@ -284,17 +284,14 @@ TYPE_PARAMETERS = {
                 
 def scheduling(path, results, time_for_activities, segment_durations):
     MANILA_TZ = pytz.timezone('Asia/Manila')
-    # --- Time Setup (RETAINING USER'S REQUESTED VARIABLES) ---
-    timeNow = datetime.now(MANILA_TZ) # Use timezone-aware datetime if needed for production
-    
-    # Extract current hour and minute for display/logging
+
+    timeNow = datetime.now(MANILA_TZ)
+
     timeHour = timeNow.hour
     timeMinutes = timeNow.minute
     
-    # T_target is the LP budget (activity time only)
     T_target = time_for_activities 
     
-    # 1. INITIALIZE AND FILTER DATA (No major changes)
     scheduled_stops = [results[i] for i in path]
     schedulable_periods = [
         item for item in scheduled_stops 
@@ -303,7 +300,6 @@ def scheduling(path, results, time_for_activities, segment_durations):
     N = len(schedulable_periods)
 
     if N == 0 or T_target <= 0:
-        # Fallback for empty or infeasible schedule (simplified for brevity)
         final_schedule = []
         current_time = timeNow
         for i, item in enumerate(scheduled_stops):
@@ -314,7 +310,7 @@ def scheduling(path, results, time_for_activities, segment_durations):
             final_schedule.append(item)
         return final_schedule
 
-    # 2. DATA PROCESSING (No change)
+
     initial_equal_duration = T_target / N 
     period_data = {}
     for period_info in schedulable_periods:
@@ -327,7 +323,7 @@ def scheduling(path, results, time_for_activities, segment_durations):
         }
     lp_period_ids = list(period_data.keys())
 
-    # 3. LINEAR PROGRAMMING MODEL FORMULATION (No change)
+    # LINEAR PROGRAMMING MODEL
     prob = LpProblem("Scheduling_Resizing_Optimization", LpMinimize)
     x = LpVariable.dict("FinalDuration", lp_period_ids, lowBound=0) 
     d_inc = LpVariable.dict("IncreaseDeviation", lp_period_ids, lowBound=0)
@@ -342,7 +338,7 @@ def scheduling(path, results, time_for_activities, segment_durations):
         prob += x[p_id] >= min_dur, f"MinDuration_Constraint_{p_id}"
         prob += x[p_id] - orig_dur == d_inc[p_id] - d_dec[p_id], f"Deviation_Linkage_{p_id}"
 
-    # 4. SOLVE AND MAP RESULTS BACK (No change)
+    # SOLVE AND MAP
     prob.solve()
     final_schedule_map = {}
     if LpStatus[prob.status] == "Optimal":
@@ -352,44 +348,38 @@ def scheduling(path, results, time_for_activities, segment_durations):
         for p_id in lp_period_ids:
              final_schedule_map[p_id] = period_data[p_id]["min_duration"]
     
-    # 5. CONSTRUCT FINAL OUTPUT WITH ABSOLUTE TIMING
-    
     final_schedule = []
     
-    # current_arrival_time starts at the actual current time (timeNow)
     current_arrival_time = timeNow 
     
     for i, item in enumerate(scheduled_stops):
         p_id = item['places']['id']
         p_type = item['interestType']
         
-        # --- 5A. Determine Activity Time (from LP) ---
+        # Determine Activity Time
         activity_minutes = 0
         if p_type not in ['Start', 'End']:
             activity_minutes = final_schedule_map.get(p_id, 0)
         
-        # --- 5B. Calculate Absolute Times ---
+        # Calculate Absolute Times
         
         # The arrival time at THIS location
         item['arrival_time'] = current_arrival_time.strftime("%I:%M %p")
         
-        # The time spent at this stop (0 for Start/End)
+        # The time spent at this stop
         activity_duration_delta = timedelta(minutes=activity_minutes)
         
         # The leave time is Arrival Time + Activity Duration
         leave_time = current_arrival_time + activity_duration_delta
         item['leave_time'] = leave_time.strftime("%I:%M %p")
         
-        # --- 5C. Update Accumulator for Next Stop ---
-        
         # Travel time FROM this stop TO the next one
         travel_out_seconds = segment_durations[i+1] if i + 1 < len(segment_durations) else 0
         travel_duration_delta = timedelta(seconds=travel_out_seconds)
         
-        # The next stop's arrival time is Leave Time + Travel Time Out
         current_arrival_time = leave_time + travel_duration_delta 
         
-        # --- 5D. Final Output Formatting ---
+        # Final Output Formatting
         item['scheduled_activity_minutes'] = activity_minutes
         
         # Travel time is the time spent traveling *to the next stop*
@@ -411,7 +401,6 @@ def polyline(route):
             }
         }
     }
-    print(origin)
     destination = {
         "location": {
             "latLng": {
@@ -420,7 +409,6 @@ def polyline(route):
             }
         }
     }
-    print(destination)
     intermediates = [
         {
             "location": {
@@ -433,7 +421,6 @@ def polyline(route):
         for i, item in enumerate(route)
         if i not in (0, lastIndex)
     ]
-    print(intermediates)
     payload = {
         "origin": origin,
         "destination": destination,
