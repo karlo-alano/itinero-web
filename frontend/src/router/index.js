@@ -26,15 +26,16 @@ const routes = [
             {path: '/Loading', name: 'Loading', component: LoadingScreen},
             {path: '/Explore', name: 'Explore', component: Explore},
             {path: '/Blog', name: 'Blog', component: Blog},
-            {path: 'Registration', name: 'Registration', component: Registration},
-            {path: '/Edit', name: 'Edit', component: ItineraryEdit}
+            {path: 'Registration', name: 'Registration', component: Registration}
+            
         ]
     },
     {
         path: '/Dashboard',
         component: SidebarLayout,
         children: [
-            {path: '', name: 'Dashboard', component: Dashboard}
+            {path: '', name: 'Dashboard', component: Dashboard},
+            {path: '/Edit', name: 'Edit', component: ItineraryEdit}
         ]
     }
 ]
