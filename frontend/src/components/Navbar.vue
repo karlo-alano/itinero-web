@@ -38,15 +38,6 @@ const isLoggedIn = false;
         <div class="bg-white w-16 h-full drop-shadow-2xl flex flex-col p-3 rounded-xl">
            <router-link to="/" class="flex flex-col items-center gap-3 py-4 hover:opacity-80 transition duration-150">
                <img src="@/assets/imgs/Itinero_standalone.svg" alt="Logo" class="h-10 w-10"/>
-               <div class="itineroword flex flex-col items-center text-sm font-bold uppercase tracking-[0.35rem] text-transparent bg-clip-text bg-gradient-to-b from-[#4B1CA8] to-[#835AF8] leading-[0.95rem]">
-                 <span>I</span>
-                 <span>T</span>
-                 <span>I</span>
-                 <span>N</span>
-                 <span>E</span>
-                 <span>R</span>
-                 <span>O</span>
-               </div>
            </router-link>
            <hr class="mb-2 mt-4">
            <div class="flex flex-col justify-between items-center h-full">
