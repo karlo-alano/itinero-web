@@ -16,6 +16,7 @@
     "@primeuix/styles": "^1.2.5",
     "@primeuix/themes": "^1.2.3",
     "@primevue/forms": "^4.3.9",
+    "@supabase/supabase-js": "^2.86.0",
     "@tailwindcss/cli": "^4.1.13",
     "@tailwindcss/vite": "^4.1.13",
     "@vee-validate/rules": "^4.15.1",
