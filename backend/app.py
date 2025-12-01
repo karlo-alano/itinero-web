@@ -8,6 +8,11 @@ import pytz
 
 load_dotenv()
 APIKEY = os.getenv('GOOGLE_API_KEY')
+
+if not APIKEY:
+    print("WARNING: GOOGLE_API_KEY environment variable not set!")
+    print("Please set your Google API key in a .env file or environment variable")
+    print("The application will not work without a valid Google API key")
 search_url = "https://places.googleapis.com/v1/places:searchNearby"
 routeMatrix_url = "https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix"
 polyline_url = "https://routes.googleapis.com/directions/v2:computeRoutes"
@@ -154,7 +159,6 @@ def search(interestsArray, startingLocation, endingLocation):
     return resultsArray, otherPlacesArray    
             
 def trace_distance(results):
-    print("DEBUG sample result:", results[0])
     all_locations = [{"waypoint": {"placeId": result['places']['id']}} for result in results]
     destinationsArray = []
     for eachResult in results:
@@ -452,5 +456,127 @@ def polyline(route):
     except requests.exceptions.RequestException as e:
         print(f"External API request failed: {e}")
      
-# if __name__ == '__main__':
-#     # app.run(debug=True)
+@app.route('/api/recalculate', methods=['POST'])
+def recalculate_itinerary():
+    try:
+        print("Recalculate endpoint called")
+        data = request.get_json()
+        print(f"Received data keys: {list(data.keys()) if data else 'No data'}")
+
+        if not data or 'ordered_stops' not in data:
+            raise ValueError("Missing 'ordered_stops' in request data")
+
+        ordered_stops = data['ordered_stops']
+        time_allotted = data.get('timeAllotted')
+
+        if not ordered_stops:
+            raise ValueError("ordered_stops is empty")
+
+        if time_allotted is None:
+            raise ValueError("timeAllotted is missing")
+
+        if not APIKEY:
+            print("WARNING: Google API key not configured, using mock data for testing")
+            # Return mock data for testing when API key is missing
+            mock_final_schedule = []
+            for i, stop in enumerate(ordered_stops):
+                mock_stop = stop.copy()
+                mock_stop['scheduled_activity_minutes'] = 30 if stop['interestType'] not in ['Start', 'End'] else 0
+                mock_stop['travel_time_to_next_stop_seconds'] = 300  # 5 minutes
+                mock_stop['arrival_time'] = f"{9 + i}:00 AM"
+                mock_stop['leave_time'] = f"{9 + i}:30 AM" if stop['interestType'] not in ['Start', 'End'] else f"{9 + i}:00 AM"
+                mock_final_schedule.append(mock_stop)
+
+            return jsonify({
+                "status": "success",
+                "message": f"Successfully recalculated itinerary with {len(ordered_stops)} stops (MOCK DATA - API key missing).",
+                "search_results": ordered_stops,
+                "distance_matrix": [],
+                "distances": [],
+                "durations": [],
+                "path": list(range(len(ordered_stops))),
+                "total_time": len(ordered_stops) * 300,
+                "total_distance": len(ordered_stops) * 500,
+                "total_time_travel": len(ordered_stops) * 300,
+                "time_for_activities": time_allotted - (len(ordered_stops) * 300 / 60),
+                "final_schedule": mock_final_schedule,
+                "segments": {
+                    "durations": [300] * (len(ordered_stops) - 1) + [0],
+                    "distances": [500] * (len(ordered_stops) - 1) + [0]
+                },
+                "polyline": "mock_polyline_data"
+            }), 200
+
+        print(f"Recalculating itinerary with {len(ordered_stops)} stops")
+        print(f"Time allotted: {time_allotted}")
+        print(f"Sample stop: {ordered_stops[0] if ordered_stops else 'No stops'}")
+        print(f"Full request data: {data}")
+
+        # Use the provided ordered stops directly (no search needed)
+        # Calculate distances and durations for the ordered stops
+        print(f"Calling trace_distance with ordered_stops")
+        matrix_data, distances, durations = trace_distance(ordered_stops)
+        print(f"trace_distance completed successfully")
+
+        # Since stops are already in the desired order, path is sequential [0, 1, 2, ..., n-1]
+        path = list(range(len(ordered_stops)))
+
+        # Calculate path metrics
+        total_distance = sum(distances[path[i]][path[i + 1]] for i in range(len(path) - 1))
+        total_time = sum(durations[path[i]][path[i + 1]] for i in range(len(path) - 1))
+
+        # Calculate segment distances and durations
+        segment_distances = [distances[path[i]][path[i + 1]] for i in range(len(path) - 1)]
+        segment_durations = [durations[path[i]][path[i + 1]] for i in range(len(path) - 1)]
+
+        # Add dummy first elements for start (to match original format)
+        segment_distances.insert(0, 0)
+        segment_durations.insert(0, 0)
+
+        # Recalculate scheduling with new distances
+        total_travel_minutes = total_time / 60
+        time_for_activities = time_allotted - total_travel_minutes
+
+        final_schedule = scheduling(path, ordered_stops, time_for_activities, segment_durations)
+
+        # Generate new polyline
+        polyline_string = polyline(final_schedule)
+
+        print(f"Recalculation complete - new total distance: {total_distance} meters")
+
+        # Return JSON in the same format as the original /api endpoint
+        return jsonify({
+            "status": "success",
+            "message": f"Successfully recalculated itinerary with {len(ordered_stops)} stops.",
+            "search_results": ordered_stops,
+            "distance_matrix": matrix_data,
+            "distances": distances,
+            "durations": durations,
+            "path": path,
+            "total_time": total_time,
+            "total_distance": total_distance,
+            "total_time_travel": total_time,
+            "time_for_activities": time_for_activities,
+            "final_schedule": final_schedule,
+            "segments": {
+                "durations": segment_durations,
+                "distances": segment_distances
+            },
+            "polyline": polyline_string
+        }), 200
+
+    except Exception as e:
+        print(f"Error in recalculate_itinerary: {e}")
+        print(f"Error type: {type(e).__name__}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "error",
+            "message": f"Internal server error: {str(e)}",
+            "error_type": type(e).__name__
+        }), 500
+
+if __name__ == '__main__':
+    print("Starting Flask server...")
+    print(f"Google API Key configured: {APIKEY is not None}")
+    app.run(debug=True, host='0.0.0.0', port=5000)
