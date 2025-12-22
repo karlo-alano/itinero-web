@@ -27,6 +27,10 @@ const selectedItinerary = ref(null);
 let stopsArray = ref(null);
 let isPublic = ref(null);
 
+// Typing animation
+const displayedTitle = ref("");
+const fullTitleText = "Pocket Journals";
+
 const selectItinerary = (itinerary) => {
     selectedItinerary.value = itinerary;
     visible.value = true;
@@ -148,13 +152,33 @@ function parseTags(tagsData) {
 }
 
 onMounted(() => {
+    // Typewriter effect for title
+    const typeWriter = () => {
+        let i = 0;
+        const speed = 80;
+        const type = () => {
+            if (i < fullTitleText.length) {
+                displayedTitle.value += fullTitleText.charAt(i);
+                i++;
+                setTimeout(type, speed);
+            }
+        };
+        setTimeout(type, 200);
+    };
+    typeWriter();
+
     fetchPublicItineraries();
 });
 </script>
 
 <template>
     <section class="min-h-dvh w-full gradient-5 p-4 pl-25 animate-enter" style="--delay:0s">
-        <h1 class="text-3xl font-bold p-4">Pocket Journals</h1>
+        <div class="mb-8">
+            <h1 class="text-5xl font-extrabold mb-2">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-600">{{ displayedTitle }}</span><span class="blinking-cursor text-purple-700">|</span>
+            </h1>
+            <p class="text-lg text-slate-600 subtext-animate">Your saved itineraries and discoveries.</p>
+        </div>
         <div v-if="isLoading" class="flex justify-center items-center text-xl">Loading...</div>
         <div class="grid grid-cols-3 gap-2">
             <div v-for="itinerary in publicItineraries" :key="itinerary.id" class="card bg-white hover:bg-slate-100 cursor-pointer animate-enter" style="--delay:0s" @click="selectItinerary(itinerary)">
@@ -225,3 +249,27 @@ onMounted(() => {
 
     </section>
 </template>
+
+<style>
+.blinking-cursor {
+    font-weight: 100;
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.subtext-animate {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: subtextFadeIn 0.8s ease-out forwards;
+    animation-delay: 0.4s;
+}
+
+@keyframes subtextFadeIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+</style>

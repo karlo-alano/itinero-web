@@ -1,9 +1,5 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from "vue";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const stepCards = ref(null);
 const howItWorks = ref(null);
@@ -28,31 +24,24 @@ const communitySection = ref(null);
 const communityTitle = ref(null);
 const communityText = ref(null);
 const communityImage = ref(null);
-
-
 const communityCardsBg = ref(null);
 const communityMainCard = ref(null);
-
-
 const displayedTitle = ref("");
 const fullTitleText = "Plan Your Intramuros Trip in a Minute";
-
-
 const hourHandRotation = ref(0);
 const minuteHandRotation = ref(0);
 const secondHandRotation = ref(0);
 const currentTimeString = ref("");
 
-let ctx;
 let clockInterval;
-
+let observer;
 
 const createAndRefresh = () => {
   console.log("Create Itinerary button clicked");
 };
 
 onMounted(() => {
-
+  // Typewriter effect for hero title
   const typeWriter = () => {
     let i = 0;
     const speed = 80; 
@@ -67,14 +56,13 @@ onMounted(() => {
   };
   typeWriter();
 
-
+  // Clock update
   const updateClock = () => {
     const now = new Date();
     const hours = now.getHours();
     const minutes = now.getMinutes();
     const seconds = now.getSeconds();
 
-    // Calculate angles
     const secondAngle = seconds * 6; 
     const minuteAngle = minutes * 6 + seconds * 0.1; 
     const hourAngle = (hours % 12) * 30 + minutes * 0.5; 
@@ -83,131 +71,33 @@ onMounted(() => {
     minuteHandRotation.value = minuteAngle;
     hourHandRotation.value = hourAngle;
 
-
     let hours12 = hours % 12;
     hours12 = hours12 ? hours12 : 12; 
     const ampm = hours >= 12 ? 'PM' : 'AM';
     currentTimeString.value = `${hours12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
   };
 
-  // Start Clock
   updateClock();
   clockInterval = setInterval(updateClock, 1000);
 
-
-  ctx = gsap.context(() => {
-    // Hero Section
-    if (heroSection.value && heroTitle.value && heroSubtitle.value && heroButton.value && heroOverlay.value) {
-      const heroTimeline = gsap.timeline({ defaults: { ease: "power3.out", duration: 0.9 } });
-      heroTimeline
-        .from(heroOverlay.value, { opacity: 0, duration: 1.2, ease: "power2.out" })
-        .from(heroSubtitle.value, { opacity: 0, y: 30 }, "-=0.6")
-        .from(heroButton.value, { opacity: 0, y: 25, scale: 0.95 }, "-=0.5");
-    }
-
-
-    if (howItWorks.value && howItWorksTitle.value) {
-      gsap.from(howItWorksTitle.value, {
-        opacity: 0,
-        y: 35,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: { trigger: howItWorks.value, start: "top 85%", toggleActions: "play none none reverse" },
-      });
-    }
-
-    if (stepCards.value && howItWorks.value) {
-      const cards = stepCards.value.children;
-      gsap.from(cards, {
-        opacity: 0,
-        y: 60,
-        duration: 0.8,
-        stagger: 0.2,
-        ease: "power2.out",
-        scrollTrigger: { trigger: howItWorks.value, start: "top 75%", toggleActions: "play none none reverse" },
-      });
-    }
-
-    const makeSectionTimeline = (sectionRefs, customImageAnim = null) => {
-      const { section, title, text, image } = sectionRefs;
-      if (section.value && title.value && text.value && image.value) {
-        const tl = gsap.timeline({
-          defaults: { ease: "power2.out", duration: 0.85 },
-          scrollTrigger: { trigger: section.value, start: "top 70%", toggleActions: "play none none reverse" },
-        });
-        tl.from(title.value, { opacity: 0, y: 40 })
-          .from(text.value, { opacity: 0, y: 35 }, "-=0.55");
-        
-        if (customImageAnim) {
-             tl.add(customImageAnim(), "-=0.55");
-        } else {
-             tl.from(image.value, { opacity: 0, scale: 0.92, y: 30 }, "-=0.55");
-        }
+  // Use Intersection Observer for scroll animations
+  observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-in');
       }
-    };
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
-    // History Section Logic
-    if (historySection.value && historyTitle.value && historyText.value && historyImage.value) {
-      const historyTl = gsap.timeline({
-        scrollTrigger: { trigger: historySection.value, start: "top 70%", toggleActions: "play none none reverse" },
-      });
-      historyTl
-        .from(historyTitle.value, { opacity: 0, y: 40, duration: 0.85, ease: "power2.out" })
-        .from(historyText.value, { opacity: 0, y: 35, duration: 0.85, ease: "power2.out" }, "-=0.55")
-        .from(historyImage.value, { opacity: 0, scale: 0.92, y: 30, duration: 0.85, ease: "power2.out" }, "-=0.55");
-
-      if (mapElements.value) {
-        historyTl.from(mapElements.value, { opacity: 0, duration: 0.6, ease: "power2.out" }, "-=0.3");
-      }
-      if (mapPath.value) {
-        const pathLength = mapPath.value.getTotalLength();
-        gsap.set(mapPath.value, { strokeDasharray: pathLength, strokeDashoffset: pathLength });
-        historyTl.to(mapPath.value, { strokeDashoffset: 0, duration: 2, ease: "power1.inOut" }, "-=0.2");
-      }
-      if (mapMarkers.value) {
-        const markers = Array.from(mapMarkers.value.children) || [];
-        if (markers.length > 0) {
-          historyTl.from(markers, { opacity: 0, scale: 0, duration: 0.4, stagger: 0.15, ease: "back.out(1.7)" }, "-=1.5");
-        }
-      }
-    }
-
-    makeSectionTimeline({ section: maximizeSection, title: maximizeTitle, text: maximizeText, image: maximizeImage });
-    
-
-    makeSectionTimeline(
-        { section: communitySection, title: communityTitle, text: communityText, image: communityImage },
-        () => {
-            const tl = gsap.timeline();
-            tl.from(communityImage.value, { opacity: 0, scale: 0.95, duration: 0.8 }, 0);
-            if (communityCardsBg.value && communityMainCard.value) {
-
-                tl.from(communityCardsBg.value.children, {
-                    rotation: 0,
-                    x: 0,
-                    y: 0,
-                    opacity: 0,
-                    stagger: 0.1,
-                    duration: 0.8,
-                    ease: "back.out(1.5)"
-                }, "-=0.4");
-                // Animate main card dropping in
-                tl.from(communityMainCard.value, {
-                    y: -50,
-                    opacity: 0,
-                    duration: 0.8,
-                    ease: "power3.out"
-                }, "-=0.6");
-            }
-            return tl;
-        }
-    );
-  }); 
+  // Observe all animatable elements
+  document.querySelectorAll('.animate-on-scroll').forEach(el => {
+    observer.observe(el);
+  });
 });
 
 onUnmounted(() => {
   if (clockInterval) clearInterval(clockInterval);
-  if (ctx) ctx.revert();
+  if (observer) observer.disconnect();
 });
 </script>
 
@@ -230,7 +120,7 @@ onUnmounted(() => {
 
         <p
           ref="heroSubtitle"
-          class="text-lg md:text-xl font-bold tracking-tight px-0 md:px-0 leading-relaxed text-white drop-shadow-[0_4px_4px_rgba(0,0,0,1)]"
+          class="hero-fade-in delay-1 text-lg md:text-xl font-bold tracking-tight px-0 md:px-0 leading-relaxed text-white drop-shadow-[0_4px_4px_rgba(0,0,0,1)]"
         >
           Generate Intramuros itineraries in seconds.<br /><br />Skip the research and get straight<br />to exploring Manila's Walled City!
         </p>
@@ -240,52 +130,82 @@ onUnmounted(() => {
           label="Try Itinero"
           rounded
           raised
-          class="w-55 interactive-btn-primary"
+          class="hero-fade-in delay-2 w-55 interactive-btn-primary"
           @click="createAndRefresh"
         ></Button>
       </div>
     </div>
     
     <div class="min-h-screen w-full flex flex-col justify-center items-center bg-gradient-to-b from-primary-50/30 to-white" ref="howItWorks">
-        <div ref="howItWorksTitle" class="text-4xl font-bold mb-6 tracking-tight drop-shadow-[0_8px_22px_rgba(92,45,190,0.35)] text-transparent bg-clip-text bg-gradient-to-r from-[#4B1CA8] to-[#835AF8]">
-          How It Works
+        <div ref="howItWorksTitle" class="animate-on-scroll section-title text-4xl font-bold mb-12 tracking-tight">
+          <span class="gradient-text-animated">How It Works</span>
         </div>
-        <div class="flex md:flex-row flex-col gap-4 w-full justify-center flex-wrap p-5" ref="stepCards">
-          <div class="w-full h-28 md:h-120 md:w-75 bg-white shadow-xl shadow-[#835AF8]/20 hover:shadow-[#835AF8]/35 rounded-2xl flex flex-col items-center justify-center p-6 border border-[#E5DCFF] transition-shadow duration-300 ease-out">
-            <span class="text-[#5D3AE9] font-semibold text-lg md:text-xl drop-shadow-[0_4px_12px_rgba(93,58,233,0.25)]">Tell Us Your Time</span>
-            <span class="text-slate-600 text-sm md:text-base text-center mt-2">Pick how much time you have to explore Intramuros.</span>
+        <div class="flex md:flex-row flex-col gap-6 w-full justify-center flex-wrap p-5" ref="stepCards">
+          <div class="animate-on-scroll delay-1 step-card w-full md:h-auto md:w-80 bg-white shadow-xl shadow-[#835AF8]/20 hover:shadow-[#835AF8]/35 rounded-3xl flex flex-col items-center justify-start p-8 border border-[#E5DCFF] transition-all duration-300 ease-out">
+            <div class="icon-badge mb-6 w-20 h-20 rounded-2xl bg-gradient-to-br from-[#a855f7] to-[#d946ef] flex items-center justify-center shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="w-full flex flex-col items-center">
+              <span class="step-card-title gradient-text-primary font-bold text-xl md:text-2xl mb-2">Tell Us Your Time</span>
+              <div class="progress-bar-container w-16 h-1 bg-gray-200 rounded-full mb-4 overflow-hidden">
+                <div class="progress-bar h-full bg-gradient-to-r from-[#a855f7] to-[#d946ef] rounded-full"></div>
+              </div>
+              <span class="section-text text-sm md:text-base text-center leading-relaxed">Pick how much time you have to explore Intramuros.</span>
+            </div>
           </div>
-          <div class="w-full h-28 md:h-120 md:w-75 bg-white shadow-xl shadow-[#835AF8]/20 hover:shadow-[#835AF8]/35 rounded-2xl flex flex-col items-center justify-center p-6 border border-[#E5DCFF] transition-shadow duration-300 ease-out">
-            <span class="text-[#5D3AE9] font-semibold text-lg md:text-xl drop-shadow-[0_4px_12px_rgba(93,58,233,0.25)]">Choose the Vibes</span>
-            <span class="text-slate-600 text-sm md:text-base text-center mt-2">Mix and match categories like Museums, Cafés, Parks, and more.</span>
+          <div class="animate-on-scroll delay-2 step-card w-full md:h-auto md:w-80 bg-white shadow-xl shadow-[#835AF8]/20 hover:shadow-[#835AF8]/35 rounded-3xl flex flex-col items-center justify-start p-8 border border-[#E5DCFF] transition-all duration-300 ease-out">
+            <div class="icon-badge mb-6 w-20 h-20 rounded-2xl bg-gradient-to-br from-[#6366f1] to-[#a855f7] flex items-center justify-center shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+              </svg>
+            </div>
+            <div class="w-full flex flex-col items-center">
+              <span class="step-card-title gradient-text-secondary font-bold text-xl md:text-2xl mb-2">Choose the Vibes</span>
+              <div class="progress-bar-container w-16 h-1 bg-gray-200 rounded-full mb-4 overflow-hidden">
+                <div class="progress-bar h-full bg-gradient-to-r from-[#6366f1] to-[#a855f7] rounded-full"></div>
+              </div>
+              <span class="section-text text-sm md:text-base text-center leading-relaxed">Mix and match categories like Museums, Cafés, Parks, and more.</span>
+            </div>
           </div>
-          <div class="w-full h-28 md:h-120 md:w-75 bg-white shadow-xl shadow-[#835AF8]/20 hover:shadow-[#835AF8]/35 rounded-2xl flex flex-col items-center justify-center p-6 border border-[#E5DCFF] transition-shadow duration-300 ease-out">
-            <span class="text-[#5D3AE9] font-semibold text-lg md:text-xl drop-shadow-[0_4px_12px_rgba(93,58,233,0.25)]">Get Your Smart Route</span>
-            <span class="text-slate-600 text-sm md:text-base text-center mt-2">See a ready-to-go map, optimized sequence, and tips to keep you on pace.</span>
+          <div class="animate-on-scroll delay-3 step-card w-full md:h-auto md:w-80 bg-white shadow-xl shadow-[#835AF8]/20 hover:shadow-[#835AF8]/35 rounded-3xl flex flex-col items-center justify-start p-8 border border-[#E5DCFF] transition-all duration-300 ease-out">
+            <div class="icon-badge mb-6 w-20 h-20 rounded-2xl bg-gradient-to-br from-[#ec4899] to-[#c026d3] flex items-center justify-center shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+            </div>
+            <div class="w-full flex flex-col items-center">
+              <span class="step-card-title gradient-text-accent font-bold text-xl md:text-2xl mb-2">Get Your Smart Route</span>
+              <div class="progress-bar-container w-16 h-1 bg-gray-200 rounded-full mb-4 overflow-hidden">
+                <div class="progress-bar h-full bg-gradient-to-r from-[#ec4899] to-[#c026d3] rounded-full"></div>
+              </div>
+              <span class="section-text text-sm md:text-base text-center leading-relaxed">See a ready-to-go map, optimized sequence, and tips to keep you on pace.</span>
+            </div>
           </div>
         </div>
     </div>
 
-    <div class="md:block flex flex-col gap-2">
+    <div class="w-full">
       <div
         ref="historySection"
-        class="h-[100dvh] md:h-[70dvh] w-full p-10 md:p-25 md:grid grid-cols-2 grid-rows-3 gap-5 bg-gradient-to-br from-white via-primary-50/45 to-white"
+        class="min-h-[100dvh] md:h-[70dvh] w-full p-10 md:p-25 flex flex-col md:grid grid-cols-2 grid-rows-3 gap-5 bg-gradient-to-br from-white via-primary-50/45 to-white"
       >
           <div
             ref="historyTitle"
-            class="text-4xl text-[#5D3AE9] font-bold col-span-1 self-end md:text-left text-center drop-shadow-[0_14px_30px_rgba(93,58,233,0.35)]"
+            class="animate-on-scroll section-title text-4xl font-bold md:col-span-1 md:self-end md:text-left text-center"
           >
-            See the History You Care About.
+            <span class="gradient-text-primary">See the History</span> <span class="gradient-text-secondary">You Care About.</span>
           </div>
           <div
             ref="historyText"
-            class="row-start-2 col-start-1 text-justify text-slate-700 leading-relaxed pl-0 pr-6 py-6 rounded-2xl"
+            class="animate-on-scroll delay-1 section-text md:row-start-2 md:col-start-1 text-justify text-base md:text-lg leading-relaxed pl-0 pr-6 py-6 rounded-2xl"
           >
             Why use a global map app when you can use one tailored for the unique cobblestone streets of Intramuros? Itinero focuses exclusively on the Walled City, giving you the most accurate and relevant routes. Better yet, you control the sightseeing agenda. Choose from 6 distinct place categories—like Churches, Museums, Cafes, Restaurants, or Parks—to ensure your itinerary is packed only with the historical, cultural, or architectural spots that interest you.
           </div>
           <div
             ref="historyImage"
-            class="col-start-2 row-span-3 md:h-full w-full bg-white rounded-3xl shadow-[0_20px_50px_rgba(130,90,248,0.15)] border border-white/80 p-4 md:p-6 flex flex-col items-center justify-center overflow-hidden"
+            class="animate-on-scroll animate-scale delay-2 md:col-start-2 md:row-span-3 md:h-full w-full bg-white rounded-3xl shadow-[0_20px_50px_rgba(130,90,248,0.15)] border border-white/80 p-4 md:p-6 flex flex-col items-center justify-center overflow-hidden"
           >
             <div class="w-full h-full flex flex-col items-center justify-center relative">
               <svg
@@ -293,7 +213,7 @@ onUnmounted(() => {
                 class="w-full h-full"
                 preserveAspectRatio="xMidYMid meet"
               >
-                <rect width="600" height="500" fill="#F5F5F0" />
+                <rect width="600" height="500" fill="#F3E8FF" />
                 
                 <g ref="mapElements">
                   <path d="M 0 0 L 600 0 L 600 120 L 450 120 L 400 80 L 350 100 L 300 60 L 250 90 L 200 50 L 150 80 L 100 40 L 50 70 L 0 50 Z" fill="#B3E5FC" opacity="0.6" />
@@ -338,21 +258,22 @@ onUnmounted(() => {
                   <text x="420" y="395" font-size="10" fill="#757575" font-family="Arial, sans-serif" font-weight="500">Sta. Lucia St</text>
                   <text x="320" y="445" font-size="10" fill="#757575" font-family="Arial, sans-serif" font-weight="500">Victoria</text>
                   
-                  <rect x="35" y="220" width="30" height="18" fill="#4CAF50" rx="3" />
+                  <rect x="35" y="220" width="30" height="18" fill="#835AF8" rx="3" />
                   <text x="40" y="232" font-size="11" fill="white" font-family="Arial, sans-serif" font-weight="bold">120</text>
                   
-                  <rect x="535" y="180" width="30" height="18" fill="#4CAF50" rx="3" />
+                  <rect x="535" y="180" width="30" height="18" fill="#835AF8" rx="3" />
                   <text x="540" y="192" font-size="11" fill="white" font-family="Arial, sans-serif" font-weight="bold">R-9</text>
                   
-                  <rect x="535" y="280" width="30" height="18" fill="#4CAF50" rx="3" />
+                  <rect x="535" y="280" width="30" height="18" fill="#835AF8" rx="3" />
                   <text x="540" y="292" font-size="11" fill="white" font-family="Arial, sans-serif" font-weight="bold">R-8</text>
                   
-                  <rect x="535" y="380" width="30" height="18" fill="#4CAF50" rx="3" />
+                  <rect x="535" y="380" width="30" height="18" fill="#835AF8" rx="3" />
                   <text x="540" y="392" font-size="11" fill="white" font-family="Arial, sans-serif" font-weight="bold">170</text>
                 </g>
                 
                 <path
                   ref="mapPath"
+                  class="route-path animate-on-scroll"
                   d="M 80 50 L 120 80 L 160 110 L 200 140 L 240 170 L 260 200 L 280 230 L 300 260 L 320 290 L 340 320 L 360 350 L 380 380 L 400 400 L 420 410 L 440 420 L 460 430"
                   fill="none"
                   stroke="#835AF8"
@@ -361,7 +282,7 @@ onUnmounted(() => {
                   stroke-linejoin="round"
                 />
                 
-                <g ref="mapMarkers">
+                <g ref="mapMarkers" class="route-markers">
                   <g transform="translate(80, 50)">
                     <path d="M 0 -12 L -8 8 L 0 4 L 8 8 Z" fill="#835AF8" />
                     <circle cx="0" cy="-8" r="6" fill="#835AF8" />
@@ -488,24 +409,24 @@ onUnmounted(() => {
   
       <div
         ref="maximizeSection"
-        class="h-[100dvh] md:h-[70dvh] w-full p-10 md:p-25 md:grid grid-cols-2 grid-rows-3 gap-5 bg-gradient-to-bl from-[#F8F6FF] via-white to-[#F2EEFF]"
+        class="min-h-[100dvh] md:h-[70dvh] w-full p-10 md:p-25 flex flex-col md:grid grid-cols-2 grid-rows-3 gap-5 bg-gradient-to-bl from-[#F8F6FF] via-white to-[#F2EEFF]"
       >
           <div
             ref="maximizeTitle"
-            class="text-4xl text-[#5D3AE9] font-bold col-start-2 col-span-1 self-end text-center md:text-right drop-shadow-[0_14px_30px_rgba(93,58,233,0.35)]"
+            class="animate-on-scroll section-title text-4xl font-bold md:col-start-2 md:col-span-1 md:self-end text-center md:text-right"
           >
-            Maximize Every Minute.
+            <span class="gradient-text-secondary">Maximize</span> <span class="gradient-text-primary">Every Minute.</span>
           </div>
           <div
             ref="maximizeText"
-            class="row-start-2 col-start-2 text-justify text-slate-700 leading-relaxed pl-6 md:pl-10 pr-0 py-6 rounded-2xl"
+            class="animate-on-scroll delay-1 section-text md:row-start-2 md:col-start-2 text-justify text-base md:text-lg leading-relaxed pl-6 md:pl-10 pr-0 py-6 rounded-2xl"
           >
             Whether you have a quick two-hour window or a full day to explore, our Time Constraint Filter is your best friend. Input your total available time, and Itinero intelligently crafts a viable route that fits your schedule without rushing you. See the results instantly visualized: a dynamic map view with polylines connecting your destinations, paired with a detailed, sequential schedule that makes navigation simple and stress-free.
           </div>
           
           <div
             ref="maximizeImage"
-            class="col-start-1 row-start-1 row-span-3 md:h-full w-full rounded-3xl shadow-[0_20px_50px_rgba(130,90,248,0.25)] border border-white/50 p-0 overflow-hidden group relative"
+            class="animate-on-scroll animate-scale delay-2 md:col-start-1 md:row-start-1 md:row-span-3 h-[420px] md:h-full w-full rounded-3xl shadow-[0_20px_50px_rgba(130,90,248,0.25)] border border-white/50 p-0 overflow-hidden group relative"
           >
             <div class="absolute inset-0 bg-gradient-to-br from-[#6366f1] via-[#8b5cf6] to-[#d946ef]"></div>
             
@@ -628,23 +549,23 @@ onUnmounted(() => {
   
       <div
         ref="communitySection"
-        class="h-[100dvh] md:h-[70dvh] w-full p-10 md:p-25 md:grid grid-cols-2 grid-rows-3 gap-5 bg-gradient-to-br from-white via-[#F4EFFF] to-white"
+        class="min-h-[100dvh] md:h-[70dvh] w-full p-10 md:p-25 flex flex-col md:grid grid-cols-2 grid-rows-3 gap-5 bg-gradient-to-br from-white via-[#F4EFFF] to-white"
       >
           <div
             ref="communityTitle"
-            class="text-4xl text-[#5D3AE9] font-bold col-span-1 self-end md:text-left text-center drop-shadow-[0_14px_30px_rgba(93,58,233,0.35)]"
+            class="animate-on-scroll section-title text-4xl font-bold md:col-span-1 md:self-end md:text-left text-center"
           >
-            Join the Itinero Community: Save, Share, and Swipe.
+            <span class="gradient-text-primary">Join the Itinero Community:</span> <span class="gradient-text-accent">Save, Share, and Swipe.</span>
           </div>
           <div
             ref="communityText"
-            class="row-start-2 col-start-1 text-justify text-slate-700 leading-relaxed pl-0 pr-6 py-6 rounded-2xl"
+            class="animate-on-scroll delay-1 section-text md:row-start-2 md:col-start-1 text-justify text-base md:text-lg leading-relaxed pl-0 pr-6 py-6 rounded-2xl"
           >
             Your journey doesn't have to end when you leave Intramuros. By creating a free account, you unlock the Itinero Community! Save your best itineraries to use again or share with friends. Even better, you can explore and "take" the curated, high-rated schedules created by other history buffs. Stop planning from scratch—get inspired by the best-planned tours and contribute your own!
           </div>
           <div
             ref="communityImage"
-            class="col-start-2 row-span-3 md:h-full w-full bg-white rounded-3xl shadow-[0_20px_50px_rgba(130,90,248,0.15)] border border-white/80 relative overflow-hidden community-graphic-container"
+            class="animate-on-scroll animate-scale delay-2 md:col-start-2 md:row-span-3 h-[420px] md:h-full w-full bg-white rounded-3xl shadow-[0_20px_50px_rgba(130,90,248,0.15)] border border-white/80 relative overflow-hidden community-graphic-container"
           >
             <svg viewBox="0 0 1000 500" class="w-full h-full" preserveAspectRatio="xMidYMid slice">
                 <defs>
@@ -768,15 +689,311 @@ onUnmounted(() => {
 }
 
 /* --- Existing Styles --- */
+
+/* Gradient Text Styles */
+.gradient-text-primary {
+  background: linear-gradient(135deg, #4B1CA8 0%, #5D3AE9 50%, #835AF8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline;
+}
+
+.gradient-text-secondary {
+  background: linear-gradient(135deg, #835AF8 0%, #a78bfa 50%, #c4b5fd 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline;
+}
+
+.gradient-text-accent {
+  background: linear-gradient(135deg, #d946ef 0%, #a855f7 50%, #6366f1 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline;
+}
+
+.gradient-text-animated {
+  background: linear-gradient(90deg, #4B1CA8, #835AF8, #d946ef, #835AF8, #4B1CA8);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientShift 4s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Section Title Animation */
+.section-title {
+  position: relative;
+}
+
+.section-title.animate-in span {
+  animation: textReveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.section-title.animate-in span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+@keyframes textReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Section Text Animation */
+.section-text {
+  color: #475569;
+  position: relative;
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.section-text.animate-in,
+.animate-in .section-text {
+  animation: textFadeSlide 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes textFadeSlide {
+  0% {
+    opacity: 0;
+    transform: translateX(-30px);
+    filter: blur(5px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0);
+  }
+}
+
+/* Step Card Animations */
+.step-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.step-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(131, 90, 248, 0.08), transparent);
+  transition: left 0.6s ease;
+}
+
+.step-card:hover::before {
+  left: 100%;
+}
+
+.step-card:hover {
+  transform: translateY(-8px);
+}
+
+.step-card-title {
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.step-card:hover .step-card-title {
+  transform: scale(1.05);
+}
+
+/* Icon Badge Animation */
+.icon-badge {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.step-card.animate-in .icon-badge {
+  animation: iconBounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.step-card:hover .icon-badge {
+  transform: scale(1.1) rotate(-8deg);
+  animation: iconTilt 0.6s ease-in-out infinite;
+}
+
+@keyframes iconBounce {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-180deg);
+  }
+  60% {
+    transform: scale(1.15) rotate(10deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes iconTilt {
+  0%, 100% {
+    transform: scale(1.1) rotate(-8deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(8deg);
+  }
+}
+
+/* Progress Bar Animation */
+.progress-bar-container {
+  position: relative;
+}
+
+.progress-bar {
+  width: 0;
+  transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s ease;
+}
+
+.step-card.animate-in .progress-bar {
+  animation: fillProgress 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation-delay: 0.4s;
+}
+
+.step-card:hover .progress-bar {
+  transform: scaleY(1.8);
+  box-shadow: 0 0 10px currentColor;
+}
+
+@keyframes fillProgress {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+/* Scroll Animation Classes */
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.animate-on-scroll.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.animate-on-scroll.delay-1 { transition-delay: 0.1s; }
+.animate-on-scroll.delay-2 { transition-delay: 0.2s; }
+.animate-on-scroll.delay-3 { transition-delay: 0.3s; }
+.animate-on-scroll.delay-4 { transition-delay: 0.4s; }
+
+.animate-scale {
+  opacity: 0;
+  transform: scale(0.9) translateY(30px);
+  transition: opacity 0.9s ease-out, transform 0.9s ease-out;
+}
+
+.animate-scale.animate-in {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* Hero animations */
+.hero-fade-in {
+  animation: heroFadeIn 1s ease-out forwards;
+}
+
+@keyframes heroFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-fade-in.delay-1 { animation-delay: 0.3s; opacity: 0; }
+.hero-fade-in.delay-2 { animation-delay: 0.6s; opacity: 0; }
+.hero-fade-in.delay-3 { animation-delay: 0.9s; opacity: 0; }
+
+/* Route path drawing animation */
+.route-path {
+  stroke-dasharray: 800;
+  stroke-dashoffset: 800;
+}
+
+.route-path.animate-on-scroll {
+  stroke-dashoffset: 800;
+  animation: none;
+}
+
+.route-path.animate-in {
+  animation: drawPath 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  filter: drop-shadow(0 4px 6px rgba(131, 90, 248, 0.25));
+}
+
+@keyframes drawPath {
+  0% {
+    stroke-dashoffset: 800;
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+/* Route markers animation - appear after path draws */
+.route-markers > g {
+  opacity: 0;
+  transform-origin: center;
+  animation: popInMarker 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.route-markers > g:nth-child(1) { animation-delay: 0.3s; }
+.route-markers > g:nth-child(2) { animation-delay: 0.6s; }
+.route-markers > g:nth-child(3) { animation-delay: 0.9s; }
+.route-markers > g:nth-child(4) { animation-delay: 1.2s; }
+.route-markers > g:nth-child(5) { animation-delay: 1.5s; }
+.route-markers > g:nth-child(6) { animation-delay: 1.8s; }
+
+@keyframes popInMarker {
+  0% { 
+    opacity: 0; 
+    transform: scale(0) translateY(10px); 
+  }
+  60% {
+    transform: scale(1.3) translateY(-2px);
+  }
+  100% { 
+    opacity: 1; 
+    transform: scale(1) translateY(0); 
+  }
+}
+
 .category-markers g {
   opacity: 0;
   animation: fadeInMarker 0.6s ease-out forwards;
 }
-.category-markers g:nth-child(1) { animation-delay: 0.1s; }
-.category-markers g:nth-child(2) { animation-delay: 0.2s; }
-.category-markers g:nth-child(3) { animation-delay: 0.3s; }
-.category-markers g:nth-child(4) { animation-delay: 0.4s; }
-.category-markers g:nth-child(5) { animation-delay: 0.5s; }
+.category-markers g:nth-child(1) { animation-delay: 2.0s; }
+.category-markers g:nth-child(2) { animation-delay: 2.2s; }
+.category-markers g:nth-child(3) { animation-delay: 2.4s; }
+.category-markers g:nth-child(4) { animation-delay: 2.6s; }
+.category-markers g:nth-child(5) { animation-delay: 2.8s; }
 
 @keyframes fadeInMarker {
   from { opacity: 0; transform: scale(0.8); }
