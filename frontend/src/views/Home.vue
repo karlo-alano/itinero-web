@@ -1,6 +1,12 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from "vue";
 
+import { useFormStore } from '@/store/formStore';
+const formStore = useFormStore();
+
+import { useRouter } from 'vue-router';
+const router = useRouter();
+
 const stepCards = ref(null);
 const howItWorks = ref(null);
 const heroSection = ref(null);
@@ -37,7 +43,8 @@ let clockInterval;
 let observer;
 
 const createAndRefresh = () => {
-  console.log("Create Itinerary button clicked");
+    formStore.resetState()
+    router.push('/Create'); 
 };
 
 onMounted(() => {
@@ -106,31 +113,31 @@ onUnmounted(() => {
 
     <div
       ref="heroSection"
-      class="relative min-h-screen w-full flex flex-col justify-center items-end px-5 py-16 md:px-16 md:py-16 bg-[url('@/assets/imgs/DSC_0355.jpg')] bg-cover bg-center md:bg-fixed"
+      class="relative min-h-screen w-full flex flex-col justify-center items-center md:items-end px-5 md:pl-15 bg-[url('@/assets/imgs/DSC_0355.jpg')] bg-cover bg-center md:bg-fixed"
     >
       <div ref="heroOverlay" class="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-transparent md:bg-gradient-to-l md:from-black/50 md:via-black/30 md:to-transparent pointer-events-none"></div>
-      <div class="relative z-10 flex flex-col items-end text-right gap-6 max-w-2xl md:max-w-xl mr-0 md:mr-16 mb-16 md:mb-24">
+      <div class="relative z-10 flex flex-col justify-center items-center md:items-end text-right gap-6 max-w-2xl md:max-w-xl mr-0 md:mr-16 mb-16 md:mb-24">
         
         <h1
           ref="heroTitle"
-          class="min-h-[120px] md:min-h-[180px] text-4xl md:text-6xl leading-tight font-extrabold text-white drop-shadow-[0_5px_5px_rgba(0,0,0,1)]"
+          class="min-h-[120px] md:min-h-[180px] text-center md:text-right text-4xl md:text-6xl leading-tight font-extrabold text-white drop-shadow-[0_5px_5px_rgba(0,0,0,1)]"
         >
           {{ displayedTitle }}<span class="blinking-cursor text-[#835AF8]">|</span>
         </h1>
 
         <p
           ref="heroSubtitle"
-          class="hero-fade-in delay-1 text-lg md:text-xl font-bold tracking-tight px-0 md:px-0 leading-relaxed text-white drop-shadow-[0_4px_4px_rgba(0,0,0,1)]"
+          class="hero-fade-in delay-1 text-center md:text-right text-lg md:text-xl font-bold tracking-tight px-0 md:px-0 leading-relaxed text-white drop-shadow-[0_4px_4px_rgba(0,0,0,1)]"
         >
           Generate Intramuros itineraries in seconds.<br /><br />Skip the research and get straight<br />to exploring Manila's Walled City!
         </p>
 
         <Button
           ref="heroButton"
-          label="Try Itinero"
+          label="Try Itinero Now!"
           rounded
           raised
-          class="hero-fade-in delay-2 w-55 interactive-btn-primary"
+          class="hero-fade-in delay-2 w-55 interactive-btn-primary font-extrabold"
           @click="createAndRefresh"
         ></Button>
       </div>

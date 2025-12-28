@@ -18,6 +18,8 @@ import Message from 'primevue/message';
 import DatePicker from 'primevue/datepicker';
 import Chip  from 'primevue/chip';
 import Dialog from 'primevue/dialog';
+import SelectButton from 'primevue/selectbutton';
+
 
 
 //Form Store and Router
@@ -146,6 +148,9 @@ const getChipPT = (tagId) => {
     };
 };
 
+const rankingPreference = ref('DISTANCE');
+const rankingLabels = ref(['DISTANCE', 'POPULARITY']);
+
 
 ////FORM AND DATA HANDLER////
 const submitHandler = () => {
@@ -155,7 +160,8 @@ const submitHandler = () => {
                 startingLocation: startPlaceData,
                 endingLocation: endPlaceData,
                 timeAllotted: simpleTime,
-                interests: selectedTagTypes.value
+                interests: selectedTagTypes.value,
+                rankingPreference: rankingPreference.value
             });
             router.push('/Loading');
             console.log('Starting Locations: ', formStore.tripData.startingLocation.name)
@@ -167,6 +173,7 @@ const submitHandler = () => {
             console.log('Place ID: ', formStore.tripData.endingLocation.place_id)
             console.log('Time: ', formStore.tripData.timeAllotted)
             console.log('Interests chosen: ', formStore.tripData.interests)
+            console.log('Ranking Preference:', formStore.tripData.rankingPreference)
         } else if (selectedTagIds.value.length == 1 && simpleTime < 60) {
             formStore.updateFormData( {
                 startingLocation: startPlaceData,
@@ -204,10 +211,10 @@ onMounted(() => {
 
 <template>
 
-  <div class="h-[100dvh] w-full p-4 md:p-20 flex flex-col justify-center items-center overflow-hidden gradient-5">
+  <div class="h-full w-full p-4 md:p-20 flex flex-col justify-center items-center overflow-hidden gradient-5">
     <Stepper value=1 linear class="md:w-[70%] h-full mt-15 md:mt-10 !z-1 animate-enter text-sm" style="--delay: 0s">
-        <StepList>
-            <Step value="1">Location</Step>
+        <StepList class="text-xs max-w-90%">
+            <Step value="1" >Location</Step>
             <Step value="2">Time</Step>
             <Step value="3">Interests</Step>
         </StepList>
@@ -275,8 +282,8 @@ onMounted(() => {
             </StepPanel>
             <StepPanel v-slot="{ activateCallback }" value="3" class="flex flex-col h-full bg-transparent">
                 <div class="md:mb-0 w-full md:w-[60%] mb-15">
-                    <h1 class="text-2xl md: 4xl font-bold font-[Poppins] w-full text-center md:text-left animate-enter" style="--delay:0s">
-                        What are the stuff you would like to see?
+                    <h1 class="text-2xl md: 4xl font-bold font-[Poppins] w-full text-center md:text-left animate-enter px-4" style="--delay:0s">
+                        What are the places you would like to see?
                     </h1>
                 </div>
                 <div class="md:h-15 h-20">
@@ -287,19 +294,22 @@ onMounted(() => {
                         </div>
                     </Transition>
                  </div>
-                <div class="flex justify-center items-start md:flex-row gap-8 md:gap-4 flex-1">
-                    <div>
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 animate-enter" style="--delay:0.1s">
-                            <Chip v-for="tag in availableTags" :key="tag.id" :label="tag.name" class="cursor-pointer" :pt="getChipPT(tag.id)" @click="toggleTag(tag.id)">
-                                <template #icon>
-                                    <i class="material-icons text-lg mr-2">{{ tag.icon }}</i> 
-                                </template>
-                            </Chip>
-                        </div>
+                <div class="flex flex-col items-center justify-center md:flex-row gap-8 md:gap-4 flex-1">
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 animate-enter" style="--delay:0.1s">
+                        <Chip v-for="tag in availableTags" :key="tag.id" :label="tag.name" class="cursor-pointer" :pt="getChipPT(tag.id)" @click="toggleTag(tag.id)">
+                            <template #icon>
+                                <i class="material-icons text-lg mr-2">{{ tag.icon }}</i> 
+                            </template>
+                        </Chip>
+                    </div>
+                    <div class="flex justify-center flex-col items-center px-4">
+                        <SelectButton v-model="rankingPreference" fluid :options="rankingLabels" class="border border-slate-300 mt-4 animate-enter mb-2" style="--delay:0.2s"/>
+                        <div v-if="rankingPreference === 'DISTANCE'" class="animate-enter text-slate-500 text-center" style="--delay:0.1s">Selects establishments that are close but not necessarily highest rated.</div>
+                        <div v-else-if="rankingPreference === 'POPULARITY'" class="animate-enter text-slate-500  text-center" style="--delay:0.1s">Selects establishments that are highest rated but not necessarily close.</div>
                     </div>
 
                 </div>
-                <div class="flex pt-6 justify-between gap-2 p-4 animate-enter" style="--delay:0.2s">
+                <div class="flex pt-6 justify-between gap-2 p-4 animate-enter" style="--delay:0.3s">
                     <Button label="Back" severity="secondary" icon="pi pi-arrow-left" class="w-40 interactive-btn-secondary" rounded @click="activateCallback('2')" />
                     <Button label="Generate" class="w-40 interactive-btn-primary" rounded type="submit" @click="submitHandler"/>
                 </div>

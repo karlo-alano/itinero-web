@@ -172,15 +172,15 @@ onMounted(() => {
 </script>
 
 <template>
-    <section class="min-h-dvh w-full gradient-5 p-4 pl-25 animate-enter" style="--delay:0s">
+    <section class="min-h-full md:h-full w-full gradient-5 p-4 md:pl-25 pt-15 md:mt-0 animate-enter" style="--delay:0s">
         <div class="mb-8">
-            <h1 class="text-5xl font-extrabold mb-2">
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-600">{{ displayedTitle }}</span><span class="blinking-cursor text-purple-700">|</span>
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-2">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-600 text-center md:text-left">{{ displayedTitle }}</span><span class="blinking-cursor text-purple-700">|</span>
             </h1>
-            <p class="text-lg text-slate-600 subtext-animate">Your saved itineraries and discoveries.</p>
+            <p class="text-lg text-slate-600 subtext-animate text-center md:text-left">Your saved itineraries and discoveries.</p>
         </div>
         <div v-if="isLoading" class="flex justify-center items-center text-xl">Loading...</div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div v-for="itinerary in publicItineraries" :key="itinerary.id" class="card bg-white hover:bg-slate-100 cursor-pointer animate-enter" style="--delay:0s" @click="selectItinerary(itinerary)">
                 <h1 class="text-xl text-slate-800 font-bold">{{ itinerary.title }}</h1>
                 <p class="font-italic text-slate-700 mb-5">Author: {{ itinerary.users?.user_name || 'Unknown' }}</p>
@@ -195,57 +195,78 @@ onMounted(() => {
         </div>
 
 
-        <Dialog v-model:visible="visible" modal :header="'Itinerary Details'" :style="{ width: '60rem'}" class="card gradient-5 h-150">
-            <div class="h-full flex flex-col justify-between" v-if="selectedItinerary">
-                <div class="flex-1">
-                    <div class="flex">
-                        <div class="w-[50%]">
-                            <div class="flex items-center gap-4 mb-4">
-                                <h1 class="font-bold text-xl">{{ selectedItinerary.title }}</h1>
-                            </div>
-                            
-                            <div class="flex items-center gap-4 mb-4">
-                                <p class="text-slate-700">{{ selectedItinerary.description }}</p>                          
-                            </div>
-
-                            <div class="flex flex-col gap-4 mb-8">
-                                <label for="tags" class="font-semibold w-24">Tags</label>
-                                <div class="flex flex-wrap gap-1 w-full">
-                                    <Chip 
-                                        v-for="tag in selectedItinerary.parsedTags" 
-                                        :key="tag" 
-                                        :label="tag" 
-                                        class="text-sm bg-white border border-slate-300"
-                                    />
-                                </div>
-                            </div>
-
-            
-                            <p class="text-sm">Created: {{ selectedItinerary.created_at }}</p>
-                            <p class="text-sm">Author: {{ selectedItinerary.users?.user_name || 'Unknown' }}</p>
-                            <p class="text-sm">Total Stops: {{ stopsArray?.length || 0 }}</p>
-                        </div>
-                        <div class="flex flex-col gap-2 overflow-y-scroll p-4">
-                            <h1 class="font-bold text-xl">Stops:</h1>
-                            <div v-for="stop in stopsArray" class="card bg-slate-100 w-full p-2">
-                                <h1>{{ stop.places.displayName.text }}</h1>
-                            </div>
-                        </div>
-                    </div>
-                </div>    
+        <Dialog 
+    v-model:visible="visible" 
+    modal 
+    header="Itinerary Details" 
+    :style="{ width: '60rem' }" 
+    :breakpoints="{ '960px': '75vw', '641px': '100vw' }"
+    class="card gradient-5 h-full md:h-150 px-4"
+>
+    <div class="h-full flex flex-col justify-between" v-if="selectedItinerary">
+        
+        <div class="flex-1 overflow-y-auto md:overflow-visible">
+            <div class="flex flex-col md:flex-row gap-6">
                 
-                <div class="flex justify-between gap-2 pt-20">
-                    <div>
-                        <Button type="button" label="Edit in Itinerary Viewer" severity="secondary" @click="visible = false" class="interactive-btn-secondary w-55 h-full"></Button>
+                <div class="w-full md:w-1/2">
+                    <div class="flex items-center gap-4 mb-4">
+                        <h1 class="font-bold text-xl">{{ selectedItinerary.title }}</h1>
                     </div>
-                    <div class="flex gap-2">
-                        <Button type="button" label="Close" severity="secondary" @click="visible = false" class="interactive-btn-secondary w-25 h-full"></Button>
-                        <Button type="button" label="Save Itinerary" @click="saveItinerary" class="interactive-btn-primary w-40" :loading="saving" :disabled="saving || !userStore.profile || selectedItinerary.owner_id === userStore.profile.id" v-if="selectedItinerary.owner_id !== userStore.profile?.id"></Button>
+                    
+                    <div class="flex items-center gap-4 mb-4">
+                        <p class="text-slate-700">{{ selectedItinerary.description }}</p>                          
+                    </div>
+
+                    <div class="flex flex-col gap-4 mb-8">
+                        <label for="tags" class="font-semibold w-24">Tags</label>
+                        <div class="flex flex-wrap gap-1 w-full">
+                            <Chip 
+                                v-for="tag in selectedItinerary.parsedTags" 
+                                :key="tag" 
+                                :label="tag" 
+                                class="text-sm bg-white border border-slate-300"
+                            />
+                        </div>
+                    </div>
+
+                    <p class="text-sm">Created: {{ selectedItinerary.created_at }}</p>
+                    <p class="text-sm">Author: {{ selectedItinerary.users?.user_name || 'Unknown' }}</p>
+                    <p class="text-sm">Total Stops: {{ stopsArray?.length || 0 }}</p>
+                </div>
+
+                <div class="w-full md:w-1/2 flex flex-col gap-2">
+                    <h1 class="font-bold text-xl">Stops:</h1>
+                    
+                    <div class="flex flex-col gap-2 max-h-60 md:max-h-[30rem] overflow-y-auto p-1">
+                        <div v-for="stop in stopsArray" :key="stop.id" class="card bg-slate-100 w-full p-2">
+                            <h1>{{ stop.places.displayName.text }}</h1>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-         </Dialog>
+            </div>
+        </div>    
+        
+        <div class="flex flex-col-reverse md:flex-row justify-between gap-4 pt-10">
+            <div>
+                <Button type="button" label="View in Map" severity="secondary" @click="visible = false" class="interactive-btn-secondary w-full md:w-55 h-full"></Button>
+            </div>
+            <div class="flex flex-col md:flex-row gap-2">
+                <Button type="button" label="Close" severity="secondary" @click="visible = false" class="interactive-btn-secondary w-full md:w-25 h-full"></Button>
+                <Button 
+                    v-if="selectedItinerary.owner_id !== userStore.profile?.id"
+                    type="button" 
+                    label="Save Itinerary" 
+                    @click="saveItinerary" 
+                    class="interactive-btn-primary w-full md:w-40" 
+                    :loading="saving" 
+                    :disabled="saving || !userStore.profile || selectedItinerary.owner_id === userStore.profile.id" 
+                ></Button>
+            </div>
+        </div>
+    </div>
+
+</Dialog>
 
     </section>
 </template>
