@@ -7,7 +7,7 @@
 
 
 <template>
-  <div class="relative h-screen w-screen flex flex-col">
+  <div class="relative h-full w-screen flex flex-col">
 
     <!-- Mobile Top Overlay (fixed positioning) -->
     <div class="md:hidden">
@@ -32,11 +32,3 @@
   </div>
 </template>
 
-<!-- 
-    <main class="absolute inset-0 z-0">
-      <router-view />
-    </main>
-
-    <div class="md:fixed md:top-0 hidden md:block left-0 right-0 z-10">
-      <Navbar />
-    </div> -->
