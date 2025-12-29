@@ -28,16 +28,29 @@ CORS(app, origins=[
 
 @app.route('/api', methods=['POST'])
 def get_all_data():
+    # Capture request timestamp
+    request_time = datetime.now(pytz.utc)
+
     data = request.get_json()
-    
+
     startingLocation = data['startingLocation']
     endingLocation = data['endingLocation']
     timeAllotted = data.get('timeAllotted')
     interestsArray = data.get('interests')
-    
+    rankingPreference = data.get('rankingPreference', 'distance')  # Default to distance if not provided
 
-    
-    results, other_results = search(interestsArray, startingLocation, endingLocation)
+    # Calculate time frame in Philippine timezone
+    time_frame = get_time_frame_and_timezone(request_time, timeAllotted)
+
+    # Use cached hours search instead of live API
+    results, other_results = search_with_cached_hours(
+        interestsArray,
+        startingLocation,
+        endingLocation,
+        rankingPreference,
+        time_frame['start_time'],
+        time_frame['end_time']
+    )
     matrixData, distances, durations = trace_distance(results)
     path, total_distance, total_time, segment_distances, segment_durations = nearest_neighbor(distances, durations)
     total_travel_minutes = total_time / 60
@@ -49,6 +62,12 @@ def get_all_data():
     return jsonify({
         "status": "success",
         "message": f"Successfully searched {len(interestsArray)} interests.",
+        "request_time": request_time.isoformat(),
+        "time_frame": {
+            "start": time_frame['start_time'].isoformat(),
+            "end": time_frame['end_time'].isoformat(),
+            "timezone": "Asia/Manila"
+        },
         "search_results": results,
         "other_results": other_results,
         "distance_matrix": matrixData,
@@ -65,7 +84,331 @@ def get_all_data():
             "distances": segment_distances
         },
         "polyline": polylineString
-    }), 200 
+    }), 200
+
+def get_time_frame_and_timezone(request_time, time_allotted):
+    """Convert UTC request time to Philippine time and calculate time frame"""
+    # Philippine Time is UTC+8
+    PHILIPPINE_TIMEZONE = pytz.timezone('Asia/Manila')
+
+    # Convert UTC to Philippine time
+    local_start_time = request_time.astimezone(PHILIPPINE_TIMEZONE)
+
+    # Calculate end time
+    local_end_time = local_start_time + timedelta(hours=time_allotted)
+
+    return {
+        'start_time': local_start_time,
+        'end_time': local_end_time,
+        'timezone': PHILIPPINE_TIMEZONE
+    }
+
+def filter_establishments_by_preferences(interests_array, ranking_preference):
+    """Load storeHours.json and filter by establishment types and ranking preference"""
+    try:
+        # Load cached establishment data
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        cache_file_path = os.path.join(script_dir, "..", "database", "storeHours.json")
+
+        with open(cache_file_path, 'r', encoding='utf-8') as f:
+            cache_data = json.load(f)
+
+        filtered_establishments = {}
+
+        # Filter by establishment types (interests) and ranking preference
+        for establishment_type in interests_array:
+            if establishment_type in cache_data['establishments']:
+                # Get the ranking type (distance or popularity)
+                ranking_key = ranking_preference.lower()  # 'distance' or 'popularity'
+
+                if ranking_key in cache_data['establishments'][establishment_type]:
+                    establishments = cache_data['establishments'][establishment_type][ranking_key]
+                    filtered_establishments[establishment_type] = establishments
+
+        return filtered_establishments
+
+    except Exception as e:
+        print(f"Error loading storeHours.json: {e}")
+        return {}
+
+def categorize_by_availability(establishments, start_time, end_time):
+    """Categorize establishments by their availability during the time frame"""
+    categorized = {
+        'full': {},
+        'partial': {},
+        'unknown': {},
+        'unavailable': {}
+    }
+
+    def is_establishment_available(opening_hours, check_start, check_end):
+        """Check if establishment is available during the specified time"""
+        if not opening_hours or 'periods' not in opening_hours:
+            return 'unknown'
+
+        # Convert times to minutes since midnight for easier comparison
+        start_minutes = check_start.hour * 60 + check_start.minute
+        end_minutes = check_end.hour * 60 + check_end.minute
+        start_day = check_start.weekday()  # 0=Monday, 1=Tuesday, ..., 6=Sunday
+        end_day = check_end.weekday()
+
+        # Convert to Google format (0=Sunday, 1=Monday, ..., 6=Saturday)
+        google_start_day = (start_day + 1) % 7
+        google_end_day = (end_day + 1) % 7
+
+        # Check if time frame spans multiple days
+        if google_start_day != google_end_day:
+            # Multi-day time frame - need to check each day
+            return check_multi_day_availability(opening_hours, google_start_day, google_end_day, start_minutes, end_minutes)
+
+        # Single day time frame
+        day_periods = [p for p in opening_hours['periods'] if p['open']['day'] == google_start_day]
+
+        if not day_periods:
+            return 'unavailable'
+
+        # Check if any period covers the entire time frame
+        fully_covered = False
+        partially_covered = False
+
+        for period in day_periods:
+            open_minutes = period['open']['hour'] * 60 + period['open']['minute']
+            close_minutes = period['close']['hour'] * 60 + period['close']['minute']
+
+            # Handle cases where closing time is next day (close_minutes < open_minutes)
+            if close_minutes < open_minutes:
+                close_minutes += 24 * 60  # Add 24 hours
+
+            # Check full coverage
+            if open_minutes <= start_minutes and close_minutes >= end_minutes:
+                fully_covered = True
+                break
+
+            # Check partial coverage
+            if (open_minutes < end_minutes and close_minutes > start_minutes):
+                partially_covered = True
+
+        if fully_covered:
+            return 'full'
+        elif partially_covered:
+            return 'partial'
+        else:
+            return 'unavailable'
+
+    def check_multi_day_availability(opening_hours, start_day, end_day, start_minutes, end_minutes):
+        """Check availability across multiple days"""
+        # For simplicity, check if establishment is open during both start and end times
+        # This is a basic implementation - could be enhanced for more complex logic
+
+        start_day_periods = [p for p in opening_hours['periods'] if p['open']['day'] == start_day]
+        end_day_periods = [p for p in opening_hours['periods'] if p['open']['day'] == end_day]
+
+        start_available = False
+        end_available = False
+
+        # Check start day availability (from start time to end of day)
+        for period in start_day_periods:
+            open_minutes = period['open']['hour'] * 60 + period['open']['minute']
+            close_minutes = period['close']['hour'] * 60 + period['close']['minute']
+            if close_minutes < open_minutes:
+                close_minutes += 24 * 60
+            if open_minutes <= start_minutes and close_minutes >= start_minutes:
+                start_available = True
+                break
+
+        # Check end day availability (from start of day to end time)
+        for period in end_day_periods:
+            open_minutes = period['open']['hour'] * 60 + period['open']['minute']
+            close_minutes = period['close']['hour'] * 60 + period['close']['minute']
+            if close_minutes < open_minutes:
+                close_minutes += 24 * 60
+            if open_minutes <= end_minutes and close_minutes >= end_minutes:
+                end_available = True
+                break
+
+        if start_available and end_available:
+            return 'full'  # Available throughout the multi-day period
+        elif start_available or end_available:
+            return 'partial'  # Available on at least one day
+        else:
+            return 'unavailable'
+
+    # Categorize all establishments
+    for establishment_type, establishment_list in establishments.items():
+        for establishment in establishment_list:
+            availability = is_establishment_available(
+                establishment.get('regularOpeningHours'),
+                start_time,
+                end_time
+            )
+
+            if availability not in categorized:
+                categorized[availability][establishment_type] = []
+            elif establishment_type not in categorized[availability]:
+                categorized[availability][establishment_type] = []
+
+            categorized[availability][establishment_type].append(establishment)
+
+    return categorized
+
+def select_itinerary_establishments(categorized_results):
+    """Select main establishments randomly from available options"""
+    main_results = []
+    other_results = []
+    warnings = []
+
+    # Process each establishment type
+    all_categories = set()
+    for availability_type in categorized_results.values():
+        all_categories.update(availability_type.keys())
+
+    for category in all_categories:
+        selected = None
+        availability_status = None
+
+        # 1. Try 'full' availability first
+        # We use random.choice to pick ANY available option for maximum variety
+        if category in categorized_results['full'] and categorized_results['full'][category]:
+            candidates = categorized_results['full'][category]
+            selected = random.choice(candidates).copy()
+            availability_status = 'full'
+
+        # 2. No full availability - Try partial
+        elif category in categorized_results['partial'] and categorized_results['partial'][category]:
+            warnings.append(f"No fully available places for {category}, using partial availability.")
+            candidates = categorized_results['partial'][category]
+            selected = random.choice(candidates).copy()
+            availability_status = 'partial'
+
+        # 3. Last resort - Try unknown
+        elif category in categorized_results['unknown'] and categorized_results['unknown'][category]:
+            warnings.append(f"No available places for {category}, using unknown availability.")
+            candidates = categorized_results['unknown'][category]
+            selected = random.choice(candidates).copy()
+            availability_status = 'unknown'
+
+        # If we found a selection, add it to main_results
+        if selected:
+            selected['availability_status'] = availability_status
+            main_results.append({
+                'interestType': category,
+                'places': selected
+            })
+        else:
+             warnings.append(f"No establishments found for {category} in any availability category")
+
+    # --- Build other_results ---
+    # We populate this with ALL other options that weren't picked as the main one
+    
+    # Helper to handle 'id' vs 'place_id' consistency
+    def get_place_id(place_obj):
+        return place_obj.get('id', place_obj.get('place_id'))
+
+    for category in all_categories:
+        category_other_results = []
+
+        # Helper to check if a place is the one we just selected as the 'Main' result
+        def is_selected_main(est):
+            est_id = get_place_id(est)
+            for main in main_results:
+                if main['interestType'] == category and get_place_id(main['places']) == est_id:
+                    return True
+            return False
+
+        # Add remaining 'Full' options to other_results (since we picked one randomly, the rest go here)
+        if category in categorized_results['full']:
+            for establishment in categorized_results['full'][category]:
+                if not is_selected_main(establishment):
+                    category_other_results.append(establishment)
+
+        # Add remaining 'Partial' options
+        if category in categorized_results['partial']:
+            for establishment in categorized_results['partial'][category]:
+                if not is_selected_main(establishment):
+                    category_other_results.append(establishment)
+
+        # Add remaining 'Unknown' options
+        if category in categorized_results['unknown']:
+            for establishment in categorized_results['unknown'][category]:
+                if not is_selected_main(establishment):
+                    category_other_results.append(establishment)
+
+        if category_other_results:
+            other_results.append({
+                'interestType': category,
+                'places': category_other_results
+            })
+
+    return {
+        'main_results': main_results,
+        'other_results': other_results,
+        'warnings': warnings
+    }
+
+def search_with_cached_hours(interests_array, starting_location, ending_location, ranking_preference, start_time, end_time):
+    """Main search function using cached establishment data with opening hours"""
+    results_array = []
+    filtered_place_array = []
+    other_places_array = []
+
+    # Add start location
+    results_array.append({
+        "interestType": "Start",
+        "places": {
+            "displayName": { "text": starting_location['name']},
+            "formattedAddress": starting_location['address'],
+            "id": starting_location.get('place_id', starting_location.get('id')), # Safety check
+            "location": {
+                "latitude": starting_location['lat'],
+                "longitude": starting_location['lng']
+            }
+        }
+    })
+
+    # Filter establishments by preferences
+    filtered_establishments = filter_establishments_by_preferences(interests_array, ranking_preference)
+
+    # Categorize by availability
+    categorized_results = categorize_by_availability(filtered_establishments, start_time, end_time)
+
+    # Select establishments for itinerary
+    selection_results = select_itinerary_establishments(categorized_results)
+
+    # Add selected establishments to results array
+    for result in selection_results['main_results']:
+        # --- FIX: Don't crash if 'place_id' is missing ---
+        # Your JSON already has 'id', so we only rename if 'place_id' exists
+        if 'place_id' in result['places']:
+            result['places']['id'] = result['places'].pop('place_id')
+        
+        results_array.append(result)
+
+        # Add to filtered_place_array for compatibility
+        filtered_place_array.append(result['places'])
+
+    # Build other_places_array from other_results
+    for other_result in selection_results['other_results']:
+        for place in other_result['places']:
+            # --- FIX: Don't crash if 'place_id' is missing ---
+            if 'place_id' in place:
+                place['id'] = place.pop('place_id')
+
+        other_places_array.append(other_result)
+
+    # Add end location
+    results_array.append({
+        "interestType": "End",
+        "places": {
+            "displayName": { "text": ending_location['name']},
+            "formattedAddress": ending_location['address'],
+            "id": ending_location.get('place_id', ending_location.get('id')), # Safety check
+            "location": {
+                "latitude": ending_location['lat'],
+                "longitude": ending_location['lng']
+            }
+        }
+    })
+
+    return results_array, other_places_array
 
 def search(interestsArray, startingLocation, endingLocation):
     center = {"lat": 14.59130,"lng": 120.97505 };
