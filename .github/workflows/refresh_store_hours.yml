@@ -1,0 +1,41 @@
+name: Refresh Store Hours
+on:
+  schedule:
+    - cron: '0 0 */14 * *' # Runs every 14 days at midnight
+  workflow_dispatch:      # Allows you to click a "Run Now" button to test it
+
+permissions:
+  contents: write         # Gives permission to commit the JSON file back
+
+jobs:
+  refresh-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install requests python-dotenv
+
+      - name: Run refresh script
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }} # Inject the secret
+        run: python backend/cache_refresh.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'StoreHours Bot'
+          git config --global user.email 'bot@noreply.github.com'
+          # Check if the file actually changed before committing
+          if [[ -n $(git status -s database/storeHours.json) ]]; then
+            git add database/storeHours.json
+            git commit -m "Auto-update: Refreshed store hours data"
+            git push
+          else
+            echo "No changes in store data."
+          fi
