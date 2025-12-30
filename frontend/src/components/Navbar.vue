@@ -43,10 +43,6 @@ const isActive = (navPath) => {
                 <Button icon="pi pi-compass" rounded class="icon-class bg-transparent border-0 text-black hover:bg-transparent transition-all duration-550 ease-in-out" />
                 <span class="label">Explore</span>
               </div>
-              <div class="nav-item hover:bg-slate-200 transition-all duration-250 ease-in-out cursor-pointer rounded-xl" :class="{ 'nav-item-active': isActive('/Blog') }"@click="router.push('/Blog')">
-                <Button icon="pi pi-book" rounded class="icon-class bg-transparent border-0 text-black hover:bg-transparent transition-all duration-550 ease-in-out"/>
-                <span class="label">Blog</span>
-              </div>
               <div class="nav-item hover:bg-slate-200 transition-all duration-250 ease-in-out cursor-pointer rounded-xl">
                 <Button icon="pi pi-cog" rounded class="icon-class bg-transparent border-0 text-black hover:bg-transparent transition-all duration-550 ease-in-out hover:rotate-45"/>
                 <span class="label">Settings</span>

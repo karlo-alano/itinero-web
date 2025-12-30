@@ -33,18 +33,15 @@ const isLoggedIn = false;
 
 <template>
     <nav class="h-2rem w-screen z-10">
-        <div class="flex justify-between p-2 gap-1 bg-white shadow-2xl">
+        <div class="flex justify-center p-2 bg-white shadow-2xl">
             <div class="nav-item" :class="{ 'nav-item-active': isActive('/Create') }">
-                <Button class="w-20 h-15 bg-white border-0 text-slate-500" severity="secondary" icon="pi pi-plus" @click="createAndRefresh" label="Create" icon-pos="top"/>
+                <Button class="w-25 h-15 bg-white border-0 text-slate-500" severity="secondary" icon="pi pi-plus" @click="createAndRefresh" label="Create" icon-pos="top"/>
             </div>
             <div class="nav-item" :class="{ 'nav-item-active': isActive('/Explore') }">
-                <Button class="w-20 h-15 bg-white border-0 text-slate-500" severity="secondary" icon="pi pi-compass" @click="router.push('/Explore')" label="Explore" icon-pos="top"/>
-            </div>
-            <div class="nav-item" :class="{ 'nav-item-active': isActive('/Blog') }">
-                <Button class="w-20 h-15 bg-white border-0 text-slate-500" severity="secondary" icon="pi pi-book" @click="router.push('/Blog')" label="Blogs" icon-pos="top"/>
+                <Button class="w-25 h-15 bg-white border-0 text-slate-500" severity="secondary" icon="pi pi-compass" @click="router.push('/Explore')" label="Explore" icon-pos="top"/>
             </div>
             <div class="nav-item" :class="{ 'nav-item-active': isActive('/Registration') || isActive('/Account')}">
-                <Button class="w-20 h-15 bg-white border-0 text-slate-500" severity="secondary" icon="pi pi-user" @click="registration" label="User" icon-pos="top"/>
+                <Button class="w-25 h-15 bg-white border-0 text-slate-500" severity="secondary" icon="pi pi-user" @click="registration" label="User" icon-pos="top"/>
             </div>
         </div>
     </nav>
