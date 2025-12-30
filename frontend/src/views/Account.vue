@@ -1,5 +1,5 @@
 <script setup>
-    import { ref } from 'vue';
+    import { ref,onMounted } from 'vue';
     import Avatar from 'primevue/avatar';
     import InputText from 'primevue/inputtext';
     import Textarea from 'primevue/textarea';
@@ -46,6 +46,7 @@
         await userStore.loadProfile(userStore.user.id);
         isEditing.value = false;
     };
+
 
 </script>
 <template>
