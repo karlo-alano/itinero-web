@@ -4,6 +4,9 @@
   import InputText from 'primevue/inputtext';
   import Button from 'primevue/button';
   import Password from 'primevue/password';
+  import Checkbox from 'primevue/checkbox'; // NEW IMPORT
+  import Dialog from 'primevue/dialog';     // NEW IMPORT
+  
   import { useUserStore } from '@/store/userStore';
   import { useRouter } from 'vue-router';
   
@@ -22,6 +25,10 @@
   const resetEmailSent = ref(false);
   let animationTimeout = null;
   
+  // Terms & Conditions State
+  const acceptedTerms = ref(false);
+  const showTermsDialog = ref(false);
+
   // Form Fields
   const email = ref('');
   const username = ref('');
@@ -52,6 +59,9 @@
       // Ensure we aren't in forgot password mode if switching between Sign In/Up
       isForgotPasswordMode.value = false; 
       
+      // Reset Terms
+      acceptedTerms.value = false;
+
       const text = isSignInMode.value ? "Sign In to Itinero" : "Create an Account";
       startTypewriter(text);
       clearForm();
@@ -62,6 +72,16 @@
       username.value = '';
       password.value = '';
       confirmPassword.value = '';
+  };
+
+  // --- TERMS LOGIC ---
+  const openTermsDialog = () => {
+    showTermsDialog.value = true;
+  };
+
+  const acceptTerms = () => {
+    acceptedTerms.value = true;
+    showTermsDialog.value = false;
   };
   
   // --- VALIDATION LOGIC ---
@@ -152,6 +172,12 @@
   
       // 3. Sign Up Validation
       if (!isSignInMode.value) {
+          // --- NEW: Terms Check ---
+          if (!acceptedTerms.value) {
+            errorMessage.value = "You must read and accept the Terms & Conditions to continue.";
+            return;
+          }
+
           if (!payloadPassword) {
               errorMessage.value = "Password is required.";
               return;
@@ -343,6 +369,17 @@
                               <label for="ConfirmPassword" class="text-surface-500">Confirm Password</label>
                           </FloatLabel>
                       </div>
+
+                      <div v-if="!isSignInMode && !isForgotPasswordMode" class="flex items-start gap-3 px-1">
+                        <div class="pt-0.5">
+                            <Checkbox v-model="acceptedTerms" :binary="true" inputId="acceptTerms" :readonly="true" class="pointer-events-none" /> 
+                        </div>
+                        <label for="acceptTerms" class="text-sm text-surface-600 leading-snug">
+                            I have read and agree to the 
+                            <span @click="openTermsDialog" class="text-purple-600 font-bold cursor-pointer hover:underline">Terms & Conditions</span>
+                            and Privacy Policy.
+                        </label>
+                      </div>
   
                       <div v-if="isSignInMode && !isForgotPasswordMode" class="flex justify-end -mt-4 mb-4">
                           <button 
@@ -379,6 +416,8 @@
                               fluid 
                               @click="toggleAccountMode" 
                           />
+  
+                          <Button label="Continue Without Registration" class="bg-transparent! border-0! text-primary! mt-5" @click="router.push('/Create')"/>
                       </div>
                   </div>
   
@@ -425,6 +464,32 @@
                   </div>
               </div>
           </div>
+
+          <Dialog v-model:visible="showTermsDialog" modal header="Terms and Conditions" :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
+            <div class="h-[400px] overflow-y-auto pr-4 text-sm text-surface-600 leading-relaxed text-justify">
+                <h3 class="font-bold text-lg mb-2 text-surface-900">1. Introduction</h3>
+                <p class="mb-4">Welcome to Itinero. By creating an account, you agree to comply with and be bound by the following terms and conditions of use.</p>
+                
+                <h3 class="font-bold text-lg mb-2 text-surface-900">2. Privacy Policy</h3>
+                <p class="mb-4">We respect your privacy. We collect your email and username solely for the purpose of account management and itinerary generation. We do not sell your data to third parties.</p>
+                
+                <h3 class="font-bold text-lg mb-2 text-surface-900">3. User Conduct</h3>
+                <p class="mb-4">You agree not to use this service for any unlawful purpose. You are responsible for maintaining the confidentiality of your account and password.</p>
+
+                <h3 class="font-bold text-lg mb-2 text-surface-900">4. Liability</h3>
+                <p class="mb-4">Itinero provides travel recommendations based on available data. We are not responsible for closed establishments, incorrect timings, or any issues arising from your trip.</p>
+                
+                <h3 class="font-bold text-lg mb-2 text-surface-900">5. Termination</h3>
+                <p class="mb-4">We reserve the right to terminate accounts that violate these terms without prior notice.</p>
+                
+                <p class="italic text-xs mt-8">Last updated: January 2026</p>
+            </div>
+            <template #footer>
+                <Button label="Cancel" text severity="secondary" @click="showTermsDialog = false" />
+                <Button label="I Read and Accept" icon="pi pi-check" @click="acceptTerms" class="interactive-btn-primary" />
+            </template>
+        </Dialog>
+
       </section>
   </template>
   
