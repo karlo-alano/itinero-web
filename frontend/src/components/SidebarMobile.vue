@@ -1,73 +1,85 @@
 <script setup>
-    import { ref, computed } from 'vue';
+    import { ref, computed, onBeforeMount } from 'vue'; // Added onBeforeMount
     import Chip from 'primevue/chip';
     import Button from 'primevue/button';
     import { useFormStore } from '@/store/formStore.js';
     import { togglePan, activeStopTitle } from '@/composables/useMap';
     import { useRouter } from 'vue-router';
-
     import { useUserStore } from '@/store/userStore.js';
-
+    
     const userStore = useUserStore();
     const isLoggedIn = userStore.hasProfile;
     
     const router = useRouter();
     const formStore = useFormStore();
     
-    // --- Data Preparation (Same as before) ---
-    const destinationsArray = formStore.tripData.stops;
-    const durations = formStore.tripData.durations;
-    const distances = formStore.tripData.distances;
-    const totalDurationData = formStore.tripData.totalDuration;
-    const totalDuration = Math.ceil(totalDurationData / 60);
+    // --- 1. COMPUTED PROPERTIES (The Fix) ---
+    // This prevents the "Cannot read properties of null" error
+    const stops = computed(() => {
+        // Safety Check: Return empty array if data is missing
+        if (!formStore.tripData || !formStore.tripData.stops) return [];
     
-    const totalDistanceData = formStore.tripData.totalDistance;
-    const totalDistance = Number(totalDistanceData / 1000).toFixed(1);
-    const stops = [];
+        const destinationsArray = formStore.tripData.stops;
+        const durations = formStore.tripData.durations || [];
+        const distances = formStore.tripData.distances || [];
     
-    destinationsArray.forEach((place, index) => {
-        const stop = {
+        return destinationsArray.map((place, index) => ({
             tag: place.interestType,
             title: place.places.displayName.text,
             address: place.places.formattedAddress,
-            distance: distances[index],
-            duration: durations[index],
+            distance: distances[index] || 0,
+            duration: durations[index] || 0,
             lat: place.places.location.latitude,
             lng: place.places.location.longitude,
             arrivalTime: place.arrival_time,
             departureTime: place.leave_time
-        }
-        stops.push(stop)
+        }));
     });
-
-    async function saveItinerary() {
-    const result = await formStore.saveTripPlan();
-
-    if (result.success) {
-        console.log('Successfully saved')
-    } else {
-        alert(`Failed to save trip: ${result.error}`);
-    }
- }
     
-    // --- Drawer Logic ---
+    const totalDuration = computed(() => {
+        if (!formStore.tripData) return 0;
+        return Math.ceil(formStore.tripData.totalDuration / 60);
+    });
+    
+    const totalDistance = computed(() => {
+        if (!formStore.tripData) return 0;
+        return Number(formStore.tripData.totalDistance / 1000).toFixed(1);
+    });
+    
+    // --- 2. LOGIC ---
+    async function saveItinerary() {
+        const result = await formStore.saveTripPlan();
+        if (result.success) {
+            console.log('Successfully saved');
+            // Optional: You could add a toast notification here
+        } else {
+            alert(`Failed to save trip: ${result.error}`);
+        }
+    }
+    
+    // Drawer Logic
     const isOpen = ref(true);
     
     const toggleButton = () => {
         isOpen.value = !isOpen.value;
     };
     
-    // If open, X is 0. If closed, X is -100% (completely hidden to the left)
     const positionClass = computed(() => {
-        return isOpen.value
-            ? 'translate-x-0'
-            : '-translate-x-[100%]';
+        return isOpen.value ? 'translate-x-0' : '-translate-x-[100%]';
     });
     
     const regenerateItinerary = () => {
         router.push('/Loading');
         formStore.regenerateItinerary();
     }
+    
+    // --- 3. SAFETY REDIRECT ---
+    onBeforeMount(() => {
+        if (!formStore.tripData || !formStore.tripData.stops) {
+            console.warn("Mobile Sidebar: No trip data found, redirecting...");
+            router.push('/Create');
+        }
+    });
     </script>
     
     <template>

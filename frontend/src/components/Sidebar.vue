@@ -1,5 +1,5 @@
 <script setup>
-    import { ref } from 'vue';
+    import { ref, onBeforeMount, computed } from 'vue';
     import Chip from 'primevue/chip';
     import Button from 'primevue/button';
     import { useRouter } from 'vue-router';
@@ -14,18 +14,15 @@
     const isLoggedIn = userStore.hasProfile;
     
     const formStore = useFormStore();
-    const destinationsArray = formStore.tripData.stops
-    const durations = formStore.tripData.durations
-    const distances = formStore.tripData.distances
-    const totalDurationData = formStore.tripData.totalDuration
-    const totalDuration = Math.ceil(totalDurationData / 60)
-    
-    const totalDistanceData = formStore.tripData.totalDistance
-    const totalDistance = Number(totalDistanceData / 1000).toFixed(1)
-    const stops = []
-    
-    destinationsArray.forEach((place, index) => {
-        const stop = {
+
+    const stops = computed(() => {
+        if (!formStore.tripData || !formStore.tripData.stops) return [];
+
+        const destinationsArray = formStore.tripData.stops;
+        const durations = formStore.tripData.durations;
+        const distances = formStore.tripData.distances;
+
+        return destinationsArray.map((place, index) => ({
             tag: place.interestType,
             title: place.places.displayName.text,
             address: place.places.formattedAddress,
@@ -35,28 +32,55 @@
             lng: place.places.location.longitude,
             arrivalTime: place.arrival_time,
             departureTime: place.leave_time
-        }
-        stops.push(stop)
-    })
+        }));
+    });
+
+    const totalDuration = computed(() => {
+        if (!formStore.tripData) return 0;
+        return Math.ceil(formStore.tripData.totalDuration / 60);
+    });
+
+    const totalDistance = computed(() => {
+        if (!formStore.tripData) return 0;
+        return Number(formStore.tripData.totalDistance / 1000).toFixed(1);
+    });
     
     const regenerateItinerary = () => {
         router.push('/Loading');
         formStore.regenerateItinerary();
     }
     
+    const isSaving = ref(false); // Controls the spinner
+    const isSaved = ref(false);  // Controls the success state
+
     async function saveItinerary() {
+        if (isSaved.value) return; // Prevent clicking if already saved
+
+        isSaving.value = true; // Start loading
         const result = await formStore.saveTripPlan();
-    
+        isSaving.value = false; // Stop loading
+
         if (result.success) {
-            console.log('Successfully saved')
+            isSaved.value = true; // Trigger success state
+            console.log('Successfully saved');
+            
+            // Optional: Reset button back to normal after 3 seconds
+            setTimeout(() => {
+                isSaved.value = false;
+            }, 3000);
         } else {
             alert(`Failed to save trip: ${result.error}`);
         }
     }
+
+    onBeforeMount(() => {
+    if (!formStore.tripData || !formStore.tripData.stops) {
+        router.push('/Create'); 
+    }});
     </script>
     
     <template>
-        <div id="sideBarContainer" class="bg-transparent z-5 p-4 h-full w-full flex flex-col gap-4">
+        <div v-if="formStore.tripData && formStore.tripData.stops" id="sideBarContainer" class="bg-transparent z-5 p-4 h-full w-full flex flex-col gap-4">
             
             <div class="w-full card flex flex-col bg-white card flex-1 overflow-hidden">
                 <div class="flex p-2 gap-2 justify-between shrink-0">
@@ -110,9 +134,20 @@
                     class="flex-1 interactive-btn-secondary !text-slate-800" 
                     @click="router.push('/Edit')"/>
                 
-                <Button icon="pi pi-save" rounded :disabled="!isLoggedIn" raised severity="secondary" 
-                    class="flex-1 interactive-btn-secondary !text-slate-800" label="Save" 
-                    @click="saveItinerary"/>
+                <Button 
+                :icon="isSaved ? 'pi pi-check' : 'pi pi-save'" 
+                :label="isSaved ? 'Saved!' : 'Save'"
+                :loading="isSaving"
+                rounded 
+                :disabled="!isLoggedIn" 
+                raised 
+                severity="secondary" 
+                :class="{
+                    'flex-1 transition-all duration-300': true,
+                    'interactive-btn-secondary !text-slate-800': !isSaved,
+                    'interactive-btn-secondary !text-slate-800 !bg-slate-200 border-slate-400 shadow-none': isSaved
+                }" 
+                @click="saveItinerary"/>
                 
                 <Button icon="pi pi-replay" rounded raised severity="secondary" label="Regenerate" 
                     class="flex-1 interactive-btn-secondary !text-slate-800" 
@@ -120,4 +155,6 @@
             </div>
     
         </div>
+
+        <div v-else>bruh</div>
     </template>
