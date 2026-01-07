@@ -150,11 +150,23 @@
     
     ///// STEP 3: INTERESTS LOGIC /////
     const interestLimit = computed(() => {
-        if (simpleTime.value <= 60) return 1;
-        if (simpleTime.value <= 120) return 3;
-        return 99; 
+        const minutes = simpleTime.value;
+        
+        // 1 Hour or less -> 1 Stop
+        if (minutes <= 60) return 1;
+        
+        // 2.5 Hours or less -> 2 Stops
+        // (120 mins is often too tight for 2 major stops + travel)
+        if (minutes <= 150) return 2;
+        
+        // 4.5 Hours or less -> 3 Stops
+        // (Allows for a relaxed 3-stop trip)
+        if (minutes <= 270) return 3;
+        
+        // Anything above 4.5 Hours -> Unlimited
+        return availableTags.value.length; 
     });
-    
+
     const toggleTag = (tagId) => {
         const index = selectedTagIds.value.indexOf(tagId);
         
@@ -165,14 +177,19 @@
         } 
         
         if (selectedTagIds.value.length >= interestLimit.value) {
-            if (interestLimit.value === 1) {
+            const limit = interestLimit.value;
+            
+            // Dynamic error messages
+            if (limit === 1) {
                 limitMessage.value = "With 1 hour or less, you can only pick 1 interest.";
-            } else {
-                limitMessage.value = `With ${Math.floor(simpleTime.value/60)} hours, you are limited to 3 interests.`;
+            } else if (limit === 2) {
+                limitMessage.value = "With this short duration, you are limited to 2 interests.";
+            } else if (limit === 3) {
+                limitMessage.value = "For trips under 4.5 hours, you are limited to 3 interests.";
             }
             
             limitedInterests.value = true;
-            setTimeout(() => limitedInterests.value = false, 5000);
+            setTimeout(() => limitedInterests.value = false, 4000);
             return; 
         }
     
@@ -180,10 +197,6 @@
         selectedTagIds.value.push(tagId);
         selectedTagTypes.value.push(tag.type)
     };
-    
-    const selectedTags = computed(() => {
-        return availableTags.value.filter(tag => selectedTagIds.value.includes(tag.id));
-    });
     
     ////STYLER OF CHIPS////
     const getChipPT = (tagId) => {
