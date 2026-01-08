@@ -4,7 +4,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 from pulp import *
 from datetime import datetime, timedelta
-import pytz
+import pytz, time
 
 load_dotenv()
 APIKEY = os.getenv('GOOGLE_API_KEY')
@@ -97,43 +97,48 @@ def categorize_by_availability(establishments, start_time, end_time):
         start_minutes = check_start.hour * 60 + check_start.minute
         end_minutes = check_end.hour * 60 + check_end.minute
         
+        # Get the correct day - use the actual date, not just weekday
+        check_date = check_start.date()
         start_day_py = check_start.weekday()
-        google_current_day = (start_day_py + 1) % 7
-        google_prev_day = (google_current_day - 1) % 7
+        google_current_day = (start_day_py + 1) % 7  # Monday=0 -> 1, etc.
 
         relevant_periods = []
 
-        # 1. Get periods starting TODAY
-        today_periods = [p for p in opening_hours['periods'] if p['open']['day'] == google_current_day]
-        for period in today_periods:
+        # Only get periods for the CURRENT day
+        current_day_periods = [p for p in opening_hours['periods'] if p['open']['day'] == google_current_day]
+        for period in current_day_periods:
             open_m = period['open']['hour'] * 60 + period['open']['minute']
             close_m = period['close']['hour'] * 60 + period['close']['minute']
-            if close_m < open_m: close_m += 1440 # Spill to next day
+            if close_m < open_m:  # Overnight - closes next day
+                close_m += 1440
             relevant_periods.append((open_m, close_m))
 
-        # 2. Get periods starting YESTERDAY (to check for 2AM closings)
+        # Handle places that opened yesterday and close today (like 24-hour places or late-night spots)
+        google_prev_day = (google_current_day - 1) % 7
         yesterday_periods = [p for p in opening_hours['periods'] if p['open']['day'] == google_prev_day]
         for period in yesterday_periods:
             open_m = period['open']['hour'] * 60 + period['open']['minute']
             close_m = period['close']['hour'] * 60 + period['close']['minute']
-            if close_m < open_m: 
+            if close_m < open_m:  # This period crosses midnight
+                # Only include the portion that extends into today
                 relevant_periods.append((0, close_m))
 
         if not relevant_periods:
             return 'unavailable'
 
+        # Now check availability for the requested time window
         fully_covered = False
         partially_covered = False
         
-        # --- FIX 2: TIGHTER THRESHOLD ---
-        # A place must be available for at least 45 minutes to be considered.
         MIN_AVAILABLE_MINUTES = 45 
 
         for open_m, close_m in relevant_periods:
+            # Full coverage: place is open throughout the entire requested window
             if open_m <= start_minutes and close_m >= end_minutes:
                 fully_covered = True
                 break
             
+            # Partial coverage: place overlaps with requested window for at least MIN_AVAILABLE_MINUTES
             overlap_start = max(open_m, start_minutes)
             overlap_end = min(close_m, end_minutes)
             
@@ -625,6 +630,7 @@ def polyline(route):
 
 @app.route('/api', methods=['POST'])
 def get_all_data():
+    random.seed(int(time.time() * 1000000) % 1000000)
     request_time = datetime.now(pytz.utc)
     data = request.get_json()
 
