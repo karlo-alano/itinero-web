@@ -38,7 +38,6 @@ TYPE_PARAMETERS = {
     "End":   {"multiplier": 1.0, "min_duration": 0}
 }
 
-# --- HELPER: TIME FRAME ---
 def get_time_frame_and_timezone(request_time, time_allotted):
     PHILIPPINE_TIMEZONE = pytz.timezone('Asia/Manila')
     local_start_time = request_time.astimezone(PHILIPPINE_TIMEZONE)
@@ -50,7 +49,7 @@ def get_time_frame_and_timezone(request_time, time_allotted):
         'timezone': PHILIPPINE_TIMEZONE
     }
 
-# --- HELPER: DATABASE LOADER ---
+# --- DATABASE LOADER ---
 def get_store_hours_data():
     """Helper to load the JSON database reliably"""
     try:
@@ -58,14 +57,43 @@ def get_store_hours_data():
         cache_file_path = os.path.join(script_dir, "database", "storeHours.json") 
         if not os.path.exists(cache_file_path):
              cache_file_path = os.path.join(script_dir, "..", "database", "storeHours.json")
+                 
         
         with open(cache_file_path, 'r', encoding='utf-8') as f:
+            print(f"LOADING DATABASE FROM: {cache_file_path}")
             return json.load(f)
     except Exception as e:
         print(f"Error loading storeHours.json: {e}")
         return None
+    
+def format_opening_hours(opening_hours, request_time):
+    if not opening_hours or 'periods' not in opening_hours:
+        return "Hours unknown"
 
-# --- HELPER: FILTERING ---
+    py_day = request_time.weekday() 
+    google_day = (py_day + 1) % 7 
+
+    for period in opening_hours['periods']:
+        if period['open']['day'] == google_day:
+            open_h = period['open']['hour']
+            open_m = period['open']['minute']
+            
+            # Handle closing time
+            close_h = period.get('close', {}).get('hour')
+            close_m = period.get('close', {}).get('minute')
+
+            if close_h is None: return "24 Hours"
+
+            # Format to AM/PM
+            def to_str(h, m):
+                d = datetime.now().replace(hour=h, minute=m)
+                return d.strftime("%I:%M %p")
+            
+            return f"{to_str(open_h, open_m)} - {to_str(close_h, close_m)}"
+    
+    return "Closed Today"
+
+# --- FILTERING ---
 def filter_establishments_by_preferences(interests_array, ranking_preference):
     cache_data = get_store_hours_data()
     if not cache_data: return {}
@@ -80,7 +108,7 @@ def filter_establishments_by_preferences(interests_array, ranking_preference):
 
     return filtered_establishments
 
-# --- HELPER: AVAILABILITY (STRICTER) ---
+# --- AVAILABILITY FILTERING ---
 def categorize_by_availability(establishments, start_time, end_time):
     """Categorize establishments by availability, checking previous day spillover"""
     categorized = {
@@ -90,6 +118,7 @@ def categorize_by_availability(establishments, start_time, end_time):
         'unavailable': {}
     }
 
+    # ... [Keep your existing inner helper function 'is_establishment_available' exactly as is] ...
     def is_establishment_available(opening_hours, check_start, check_end):
         if not opening_hours or 'periods' not in opening_hours:
             return 'unknown'
@@ -97,14 +126,12 @@ def categorize_by_availability(establishments, start_time, end_time):
         start_minutes = check_start.hour * 60 + check_start.minute
         end_minutes = check_end.hour * 60 + check_end.minute
         
-        # Get the correct day - use the actual date, not just weekday
         check_date = check_start.date()
         start_day_py = check_start.weekday()
-        google_current_day = (start_day_py + 1) % 7  # Monday=0 -> 1, etc.
+        google_current_day = (start_day_py + 1) % 7
 
         relevant_periods = []
 
-        # Only get periods for the CURRENT day
         current_day_periods = [p for p in opening_hours['periods'] if p['open']['day'] == google_current_day]
         for period in current_day_periods:
             open_m = period['open']['hour'] * 60 + period['open']['minute']
@@ -113,32 +140,27 @@ def categorize_by_availability(establishments, start_time, end_time):
                 close_m += 1440
             relevant_periods.append((open_m, close_m))
 
-        # Handle places that opened yesterday and close today (like 24-hour places or late-night spots)
         google_prev_day = (google_current_day - 1) % 7
         yesterday_periods = [p for p in opening_hours['periods'] if p['open']['day'] == google_prev_day]
         for period in yesterday_periods:
             open_m = period['open']['hour'] * 60 + period['open']['minute']
             close_m = period['close']['hour'] * 60 + period['close']['minute']
-            if close_m < open_m:  # This period crosses midnight
-                # Only include the portion that extends into today
+            if close_m < open_m:  
                 relevant_periods.append((0, close_m))
 
         if not relevant_periods:
             return 'unavailable'
 
-        # Now check availability for the requested time window
         fully_covered = False
         partially_covered = False
         
         MIN_AVAILABLE_MINUTES = 45 
 
         for open_m, close_m in relevant_periods:
-            # Full coverage: place is open throughout the entire requested window
             if open_m <= start_minutes and close_m >= end_minutes:
                 fully_covered = True
                 break
             
-            # Partial coverage: place overlaps with requested window for at least MIN_AVAILABLE_MINUTES
             overlap_start = max(open_m, start_minutes)
             overlap_end = min(close_m, end_minutes)
             
@@ -154,6 +176,7 @@ def categorize_by_availability(establishments, start_time, end_time):
         else:
             return 'unavailable'
 
+    # ... [Keep your existing loop] ...
     for establishment_type, establishment_list in establishments.items():
         for establishment in establishment_list:
             availability = is_establishment_available(
@@ -168,9 +191,35 @@ def categorize_by_availability(establishments, start_time, end_time):
             
             categorized[availability][establishment_type].append(establishment)
 
+    # --- NEW: DEBUG PRINTS ---
+    print(f"\n=== AVAILABILITY DEBUG LOG ===")
+    print(f"Checking Window: {start_time.strftime('%H:%M')} - {end_time.strftime('%H:%M')}")
+    
+    for status in ['full', 'partial', 'unknown', 'unavailable']:
+        print(f"\n--- {status.upper()} ---")
+        if status in categorized and categorized[status]:
+            for cat, places in categorized[status].items():
+                print(f"  [{cat}]: {len(places)} places")
+                for p in places:
+                    name = p.get('displayName', {}).get('text', 'Unknown')
+                    print(f"     - {name}")
+        else:
+            print("  (None)")
+    print("==============================\n")
+    # -------------------------
+
     return categorized
 
 def select_itinerary_establishments(categorized_results, start_time):
+    print("\n=== SELECTION POOL DEBUG ===")
+    for cat in ['full', 'partial', 'unknown']:
+        count = 0
+        if cat in categorized_results:
+             for interest, places in categorized_results[cat].items():
+                 count += len(places)
+        print(f"Total {cat} candidates available: {count}")
+    print("============================\n")
+    
     main_results = []
     other_results = []
     warnings = []
@@ -248,7 +297,6 @@ def search_with_cached_hours(interests_array, starting_location, ending_location
     filtered_place_array = []
     other_places_array = []
 
-    # Start
     results_array.append({
         "interestType": "Start",
         "places": {
@@ -270,6 +318,8 @@ def search_with_cached_hours(interests_array, starting_location, ending_location
     for result in selection_results['main_results']:
         if 'place_id' in result['places']:
             result['places']['id'] = result['places'].pop('place_id')
+        raw_hours = result['places'].get('regularOpeningHours')
+        result['places']['readable_hours'] = format_opening_hours(raw_hours, start_time)    
         results_array.append(result)
         filtered_place_array.append(result['places'])
 
@@ -277,9 +327,11 @@ def search_with_cached_hours(interests_array, starting_location, ending_location
         for place in other_result['places']:
             if 'place_id' in place:
                 place['id'] = place.pop('place_id')
+            raw_hours = place.get('regularOpeningHours')
+            place['readable_hours'] = format_opening_hours(raw_hours, start_time)
+                
         other_places_array.append(other_result)
 
-    # End
     results_array.append({
         "interestType": "End",
         "places": {
@@ -295,7 +347,7 @@ def search_with_cached_hours(interests_array, starting_location, ending_location
 
     return results_array, other_places_array
 
-# --- HELPER: ROUTING ---
+# --- ROUTING ---
 def trace_distance(results):
     all_locations = [{"waypoint": {"placeId": result['places']['id']}} for result in results]
     destinationsArray = [result['places'] for result in results]
@@ -502,16 +554,90 @@ def scheduling(path, results, time_for_activities, segment_durations):
     
     return final_schedule
 
-# --- FIX 3: POST-SCHEDULE VALIDATION ---
-def validate_arrival_times(schedule, request_time):
+# --- CHECK TIME SPECIFICALLY ---
+def is_establishment_open_at_time(opening_hours, check_time):
     """
-    Checks arrival times against store hours.
-    Flags locations that will be closed by the time the user arrives.
+    Check if establishment is open at a specific time, 
+    accounting for the specific Day of Week and midnight spillover.
+    """
+    if not opening_hours or 'periods' not in opening_hours:
+        return False
+
+    py_day = check_time.weekday()
+    google_current_day = (py_day + 1) % 7
+    google_prev_day = (google_current_day - 1) % 7
+    
+    check_minutes = check_time.hour * 60 + check_time.minute
+
+    for period in opening_hours['periods']:
+        p_day = period['open']['day']
+        open_m = period['open']['hour'] * 60 + period['open']['minute']
+        close_m = period['close']['hour'] * 60 + period['close']['minute']
+        
+        if p_day == google_current_day:
+            if close_m < open_m: 
+                if check_minutes >= open_m:
+                    return True
+            else: 
+                if open_m <= check_minutes < close_m:
+                    return True
+
+        if p_day == google_prev_day:
+            if close_m < open_m: 
+                if check_minutes < close_m:
+                    return True
+
+    return False
+
+# --- CHECK DURATION ---
+def is_establishment_open_during_duration(opening_hours, start_time, end_time):
+    """
+    Check if establishment stays open throughout the entire visit duration,
+    strictly checking the Day of Week.
+    """
+    if not opening_hours or 'periods' not in opening_hours:
+        return False
+
+    start_minutes = start_time.hour * 60 + start_time.minute
+    end_minutes = end_time.hour * 60 + end_time.minute
+    
+    visit_crosses_midnight = end_time.date() > start_time.date()
+    if visit_crosses_midnight:
+        end_minutes += 1440
+
+    py_day = start_time.weekday()
+    google_current_day = (py_day + 1) % 7
+    google_prev_day = (google_current_day - 1) % 7
+
+    for period in opening_hours['periods']:
+        p_day = period['open']['day']
+        open_m = period['open']['hour'] * 60 + period['open']['minute']
+        close_m = period['close']['hour'] * 60 + period['close']['minute']
+
+        if p_day == google_current_day:
+            actual_close = close_m
+            if close_m < open_m: 
+                actual_close = close_m + 1440
+            
+            if open_m <= start_minutes and actual_close >= end_minutes:
+                return True
+
+        if p_day == google_prev_day:
+            if close_m < open_m: 
+                
+                if start_minutes >= 0 and end_minutes <= close_m:
+                    return True
+
+    return False
+
+# --- POST-SCHEDULE VALIDATION ---
+def validate_arrival_times(schedule, request_time, other_results):
+    """
+    Checks arrival times against store hours and replaces closed locations with open alternatives.
     """
     cache_data = get_store_hours_data()
     if not cache_data: return schedule
 
-    # Flatten cache for easy ID lookup
     hours_map = {}
     for cat, rankings in cache_data['establishments'].items():
         for r_key, places in rankings.items():
@@ -519,56 +645,68 @@ def validate_arrival_times(schedule, request_time):
                 p_id = p.get('id', p.get('place_id'))
                 hours_map[p_id] = p.get('regularOpeningHours')
 
-    for stop in schedule:
+    stops_to_remove = [] 
+
+    for i, stop in enumerate(schedule):
         if stop['interestType'] in ['Start', 'End']: continue
-        
+
         place_id = stop['places']['id']
-        arrival_str = stop['arrival_time'] 
-        
+        arrival_str = stop['arrival_time']
+        leave_str = stop['leave_time']
+
         try:
             arrival_dt = datetime.strptime(arrival_str, "%I:%M %p")
-            # Combine with request_time date
             arrival_time = request_time.replace(
-                hour=arrival_dt.hour, 
-                minute=arrival_dt.minute, 
-                second=0, 
+                hour=arrival_dt.hour,
+                minute=arrival_dt.minute,
+                second=0,
                 microsecond=0
             )
-            # Handle day rollover
             if arrival_time < request_time and arrival_time.hour < 12:
                 arrival_time += timedelta(days=1)
+
+            leave_dt = datetime.strptime(leave_str, "%I:%M %p")
+            leave_time = request_time.replace(
+                hour=leave_dt.hour,
+                minute=leave_dt.minute,
+                second=0,
+                microsecond=0
+            )
+            if leave_time < arrival_time: 
+                leave_time += timedelta(days=1)
         except ValueError:
             continue
 
         opening_hours = hours_map.get(place_id)
         if not opening_hours: continue
 
-        arrival_minutes = arrival_time.hour * 60 + arrival_time.minute
-        google_day = (arrival_time.weekday() + 1) % 7
-        
-        is_open = False
-        closing_time_str = "unknown"
+        if not is_establishment_open_during_duration(opening_hours, arrival_time, leave_time):
+            category = stop['interestType']
+            replacement_found = False
 
-        if 'periods' in opening_hours:
-            for period in opening_hours['periods']:
-                if period['open']['day'] == google_day:
-                    open_m = period['open']['hour'] * 60 + period['open']['minute']
-                    close_m = period['close']['hour'] * 60 + period['close']['minute']
-                    
-                    if close_m < open_m: close_m += 1440
-                    
-                    # Strict check: Open at arrival, and stays open for 30 mins
-                    if open_m <= arrival_minutes < (close_m - 30):
-                        is_open = True
+            for other_category in other_results:
+                if other_category['interestType'] == category:
+                    for alternative in other_category['places']:
+                        alt_id = alternative.get('id', alternative.get('place_id'))
+                        alt_hours = hours_map.get(alt_id)
+
+                        if alt_hours and is_establishment_open_during_duration(alt_hours, arrival_time, leave_time):
+                            stop['places'] = alternative.copy()
+                            stop['replacement_note'] = f"Replaced with alternative that stays open for full visit duration: {alternative.get('displayName', {}).get('text', 'Unknown')}"
+                            replacement_found = True
+                            print(f"Replaced {category} stop with duration-valid alternative")
+                            break
+                    if replacement_found:
                         break
-                    else:
-                        h = period['close']['hour']
-                        m = period['close']['minute']
-                        closing_time_str = f"{h:02d}:{m:02d}"
 
-        if not is_open:
-            stop['warning'] = f"Caution: This location may be closed (Closes around {closing_time_str})."
-            stop['is_closed_on_arrival'] = True
+            if not replacement_found:
+                stops_to_remove.append(i)
+                stop['removed_reason'] = "No alternatives stay open for full visit duration"
+                print(f"No replacement found for {category} - will be removed")
+
+    for i in reversed(stops_to_remove):
+        removed_stop = schedule.pop(i)
+        print(f"Removed stop: {removed_stop['interestType']} - duration validation: {removed_stop.get('removed_reason', 'Unknown reason')}")
 
     return schedule
 
@@ -630,7 +768,6 @@ def polyline(route):
 
 @app.route('/api', methods=['POST'])
 def get_all_data():
-    random.seed(int(time.time() * 1000000) % 1000000)
     request_time = datetime.now(pytz.utc)
     data = request.get_json()
 
@@ -640,10 +777,8 @@ def get_all_data():
     interestsArray = data.get('interests')
     rankingPreference = data.get('rankingPreference', 'distance')
 
-    # 1. Calculate time frame
     time_frame = get_time_frame_and_timezone(request_time, timeAllotted)
 
-    # 2. Search & Filter
     results, other_results = search_with_cached_hours(
         interestsArray,
         startingLocation,
@@ -653,8 +788,6 @@ def get_all_data():
         time_frame['end_time']
     )
 
-    # --- FIX 1: BYPASS IF NO OPEN LOCATIONS ---
-    # Check if we only have Start and End (Len <= 2)
     if len(results) <= 2:
         return jsonify({
             "status": "empty",
@@ -664,23 +797,27 @@ def get_all_data():
             "other_results": []
         }), 200
 
-    # 3. Calculate Distances
     matrixData, distances, durations = trace_distance(results)
 
-    # 4. Route Optimization (Nearest Neighbor)
     path, total_distance, total_time, segment_distances, segment_durations = nearest_neighbor(distances, durations)
     
     total_travel_minutes = total_time / 60
     time_for_activities = timeAllotted - total_travel_minutes
 
-    # 5. Scheduling
     final_schedule = scheduling(path, results, time_for_activities, segment_durations)
     
-    # --- FIX 3: VALIDATE ARRIVAL TIMES ---
-    # Check if stops are actually open at the scheduled arrival time
-    final_schedule = validate_arrival_times(final_schedule, request_time.astimezone(pytz.timezone('Asia/Manila')))
+    final_schedule = validate_arrival_times(final_schedule, request_time.astimezone(pytz.timezone('Asia/Manila')), other_results)
 
-    # 6. Generate Polyline
+    count_activities = sum(1 for item in final_schedule if item['interestType'] not in ['Start', 'End'])
+    
+    if count_activities == 0:
+        return jsonify({
+            "status": "empty",
+            "message": "We found places, but they close before you would arrive.",
+            "search_results": [],
+            "final_schedule": [],
+            "other_results": []
+        }), 200
     polylineString = polyline(final_schedule)
     
     return jsonify({
@@ -717,14 +854,12 @@ def recalculate_itinerary():
         ordered_stops = data['ordered_stops']
         time_allotted = data.get('timeAllotted')
         
-        # Recalculate Logic
         matrix_data, distances, durations = trace_distance(ordered_stops)
         path = list(range(len(ordered_stops)))
         
         total_distance = sum(distances[path[i]][path[i + 1]] for i in range(len(path) - 1))
         total_time = sum(durations[path[i]][path[i + 1]] for i in range(len(path) - 1))
         
-        # --- CALCULATE SEGMENTS ---
         segment_distances = [0] + [distances[path[i]][path[i + 1]] for i in range(len(path) - 1)]
         segment_durations = [0] + [durations[path[i]][path[i + 1]] for i in range(len(path) - 1)]
 
@@ -733,9 +868,8 @@ def recalculate_itinerary():
 
         final_schedule = scheduling(path, ordered_stops, time_for_activities, segment_durations)
         
-        # Validate Arrival Times
         request_time = datetime.now(pytz.timezone('Asia/Manila'))
-        final_schedule = validate_arrival_times(final_schedule, request_time)
+        final_schedule = validate_arrival_times(final_schedule, request_time, [])
 
         polyline_string = polyline(final_schedule)
 
@@ -748,12 +882,10 @@ def recalculate_itinerary():
             "total_time": total_time,
             "total_distance": total_distance,
             "final_schedule": final_schedule,
-            # --- THE MISSING PIECE ---
             "segments": {
                 "durations": segment_durations,
                 "distances": segment_distances
             },
-            # -------------------------
             "polyline": polyline_string
         }), 200
 
