@@ -7,14 +7,10 @@ const formStore = useFormStore();
 import { useRouter, useRoute } from 'vue-router';
 const router = useRouter();
 
-import { useToast } from 'primevue/usetoast';
-import { useToastStore } from '@/store/toastStore';       
-import Toast from 'primevue/toast';
+import { useUserStore } from '@/store/userStore';
+const userStore = useUserStore();
 
-const toast = useToast();
-const toastStore = useToastStore();
-const route = useRoute();   
-
+const isLoggedIn = userStore.hasProfile;
 
 
 const displayedTitle = ref("");
@@ -28,8 +24,13 @@ let clockInterval;
 let observer;
 
 const createAndRefresh = () => {
+  if (isLoggedIn) {
     formStore.resetState()
     router.push('/Create'); 
+  } else {
+    router.push('/Registration')
+  }
+
 };
 
 onMounted(() => {
