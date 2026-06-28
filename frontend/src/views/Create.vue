@@ -367,11 +367,11 @@
                                 </template>
                             </Chip>
                         </div>
-                        <div class="flex justify-center flex-col items-center px-4">
+                        <!-- <div class="flex justify-center flex-col items-center px-4">
                             <SelectButton v-model="rankingPreference" fluid :options="rankingLabels" class="border border-slate-300 mt-4 animate-enter mb-2" style="--delay:0.2s"/>
                             <div v-if="rankingPreference === 'DISTANCE'" class="animate-enter text-slate-500 text-center" style="--delay:0.1s">Selects establishments that are close but not necessarily highest rated.</div>
                             <div v-else-if="rankingPreference === 'POPULARITY'" class="animate-enter text-slate-500  text-center" style="--delay:0.1s">Selects establishments that are highest rated but not necessarily close.</div>
-                        </div>
+                        </div> -->
     
                     </div>
                     <div class="flex pt-6 justify-between gap-2 p-4 animate-enter" style="--delay:0.3s">

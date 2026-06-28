@@ -1,6 +1,6 @@
 <script setup>
 import { watch } from 'vue';
-import { useRoute } from 'vue-router'; // We watch the route changing
+import { useRoute } from 'vue-router'; 
 import { useToast } from 'primevue/usetoast';
 import { useToastStore } from '@/store/toastStore';
 import Toast from 'primevue/toast';
@@ -13,7 +13,6 @@ const route = useRoute();
     const message = toastStore.consume(); 
     
     if (message) {
-        // If yes, show it now
         toast.add(message);
     }
 }, { immediate: true });
