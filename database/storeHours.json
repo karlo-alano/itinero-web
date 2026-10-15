@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-10-01T04:22:45.087477+00:00",
+  "last_updated": "2026-10-15T03:23:29.091773+00:00",
   "establishments": {
     "restaurant": {
       "distance": [
@@ -124,7 +124,7 @@
               "Saturday: 9:00 AM – 10:00 PM",
               "Sunday: 9:00 AM – 10:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T14:00:00Z"
+            "nextCloseTime": "2026-10-15T14:00:00Z"
           }
         },
         {
@@ -274,7 +274,7 @@
               "Saturday: 10:00 AM – 8:00 PM",
               "Sunday: 10:00 AM – 8:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T12:00:00Z"
+            "nextCloseTime": "2026-10-15T12:00:00Z"
           }
         },
         {
@@ -385,7 +385,7 @@
               "Saturday: 8:00 AM – 8:00 PM",
               "Sunday: 8:00 AM – 8:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T12:00:00Z"
+            "nextCloseTime": "2026-10-15T12:00:00Z"
           }
         },
         {
@@ -509,7 +509,7 @@
               "Saturday: 7:30 AM – 5:00 PM",
               "Sunday: 7:30 AM – 5:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T09:00:00Z"
+            "nextCloseTime": "2026-10-15T09:00:00Z"
           }
         },
         {
@@ -620,7 +620,7 @@
               "Saturday: 10:00 AM – 10:00 PM",
               "Sunday: 10:00 AM – 10:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T14:00:00Z"
+            "nextCloseTime": "2026-10-15T14:00:00Z"
           }
         }
       ],
@@ -733,7 +733,7 @@
               "Saturday: 9:00 AM – 9:00 PM",
               "Sunday: 9:00 AM – 9:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T13:00:00Z"
+            "nextCloseTime": "2026-10-15T13:00:00Z"
           }
         },
         {
@@ -832,7 +832,7 @@
               "Saturday: 11:00 AM – 9:00 PM",
               "Sunday: 11:00 AM – 9:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T13:00:00Z"
+            "nextCloseTime": "2026-10-15T13:00:00Z"
           }
         },
         {
@@ -943,7 +943,7 @@
               "Saturday: 8:00 AM – 10:00 PM",
               "Sunday: 9:00 AM – 6:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T14:00:00Z"
+            "nextCloseTime": "2026-10-15T14:00:00Z"
           }
         },
         {
@@ -1054,7 +1054,7 @@
               "Saturday: 6:00 AM – 11:00 PM",
               "Sunday: 6:00 AM – 11:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T14:00:00Z"
+            "nextCloseTime": "2026-10-15T14:00:00Z"
           }
         },
         {
@@ -1165,7 +1165,7 @@
               "Saturday: 5:30 AM – 10:00 PM",
               "Sunday: 5:30 AM – 10:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T14:00:00Z"
+            "nextCloseTime": "2026-10-15T14:00:00Z"
           }
         },
         {
@@ -1276,7 +1276,7 @@
               "Saturday: 4:00 – 11:00 PM",
               "Sunday: 4:00 – 11:00 PM"
             ],
-            "nextOpenTime": "2026-10-01T08:00:00Z"
+            "nextOpenTime": "2026-10-15T08:00:00Z"
           }
         },
         {
@@ -1387,7 +1387,7 @@
               "Saturday: 11:00 AM – 2:00 AM",
               "Sunday: 11:00 AM – 1:30 AM"
             ],
-            "nextCloseTime": "2026-10-01T17:30:00Z"
+            "nextCloseTime": "2026-10-15T17:30:00Z"
           }
         },
         {
@@ -1498,7 +1498,7 @@
               "Saturday: 6:00 AM – 8:00 PM",
               "Sunday: 6:00 AM – 8:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T13:00:00Z"
+            "nextCloseTime": "2026-10-15T13:00:00Z"
           }
         },
         {
@@ -1609,7 +1609,7 @@
               "Saturday: 9:00 AM – 6:00 PM",
               "Sunday: 9:00 AM – 6:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T10:00:00Z"
+            "nextCloseTime": "2026-10-15T10:00:00Z"
           }
         },
         {
@@ -1720,7 +1720,7 @@
               "Saturday: 10:00 AM – 8:30 PM",
               "Sunday: 10:00 AM – 8:30 PM"
             ],
-            "nextCloseTime": "2026-10-01T12:00:00Z"
+            "nextCloseTime": "2026-10-15T12:00:00Z"
           }
         }
       ]
@@ -1900,7 +1900,7 @@
               "Saturday: 10:00 AM – 8:00 PM",
               "Sunday: 10:00 AM – 8:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T12:00:00Z"
+            "nextCloseTime": "2026-10-15T12:00:00Z"
           }
         },
         {
@@ -2011,7 +2011,7 @@
               "Saturday: 8:00 AM – 10:00 PM",
               "Sunday: 8:00 AM – 10:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T13:00:00Z"
+            "nextCloseTime": "2026-10-15T13:00:00Z"
           }
         },
         {
@@ -2135,7 +2135,7 @@
               "Saturday: 11:00 AM – 2:00 AM",
               "Sunday: 11:00 AM – 1:30 AM"
             ],
-            "nextCloseTime": "2026-10-01T17:30:00Z"
+            "nextCloseTime": "2026-10-15T17:30:00Z"
           }
         },
         {
@@ -2246,7 +2246,7 @@
               "Saturday: 10:00 AM – 8:00 PM",
               "Sunday: 10:00 AM – 8:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T12:00:00Z"
+            "nextCloseTime": "2026-10-15T12:00:00Z"
           }
         }
       ],
@@ -2359,7 +2359,7 @@
               "Saturday: 8:00 AM – 10:00 PM",
               "Sunday: 8:00 AM – 10:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T13:00:00Z"
+            "nextCloseTime": "2026-10-15T13:00:00Z"
           }
         },
         {
@@ -2458,7 +2458,7 @@
               "Saturday: 11:00 AM – 9:00 PM",
               "Sunday: 11:00 AM – 9:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T13:00:00Z"
+            "nextCloseTime": "2026-10-15T13:00:00Z"
           }
         },
         {
@@ -2569,7 +2569,7 @@
               "Saturday: 8:00 AM – 10:00 PM",
               "Sunday: 9:00 AM – 6:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T14:00:00Z"
+            "nextCloseTime": "2026-10-15T14:00:00Z"
           }
         },
         {
@@ -2680,7 +2680,7 @@
               "Saturday: 7:00 AM – 11:00 PM",
               "Sunday: 7:00 AM – 11:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T14:00:00Z"
+            "nextCloseTime": "2026-10-15T14:00:00Z"
           }
         },
         {
@@ -2791,7 +2791,7 @@
               "Saturday: 7:30 AM – 9:00 PM",
               "Sunday: 7:30 AM – 9:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T13:00:00Z"
+            "nextCloseTime": "2026-10-15T13:00:00Z"
           }
         },
         {
@@ -2902,7 +2902,7 @@
               "Saturday: 9:00 AM – 9:00 PM",
               "Sunday: 9:00 AM – 9:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T12:00:00Z"
+            "nextCloseTime": "2026-10-15T12:00:00Z"
           }
         },
         {
@@ -3013,7 +3013,7 @@
               "Saturday: 11:00 AM – 2:00 AM",
               "Sunday: 11:00 AM – 1:30 AM"
             ],
-            "nextCloseTime": "2026-10-01T17:30:00Z"
+            "nextCloseTime": "2026-10-15T17:30:00Z"
           }
         },
         {
@@ -3124,7 +3124,7 @@
               "Saturday: 8:00 AM – 10:00 PM",
               "Sunday: 8:00 AM – 10:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T13:00:00Z"
+            "nextCloseTime": "2026-10-15T13:00:00Z"
           }
         },
         {
@@ -3235,7 +3235,7 @@
               "Saturday: 7:00 AM – 8:00 PM",
               "Sunday: 8:00 AM – 6:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T13:00:00Z"
+            "nextCloseTime": "2026-10-15T13:00:00Z"
           }
         },
         {
@@ -3346,7 +3346,7 @@
               "Saturday: 8:00 AM – 10:00 PM",
               "Sunday: 8:00 AM – 10:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T14:00:00Z"
+            "nextCloseTime": "2026-10-15T14:00:00Z"
           }
         }
       ]
@@ -3449,7 +3449,7 @@
               "Saturday: 10:00 AM – 4:30 PM",
               "Sunday: 10:00 AM – 4:30 PM"
             ],
-            "nextCloseTime": "2026-10-01T08:30:00Z"
+            "nextCloseTime": "2026-10-15T08:30:00Z"
           }
         },
         {
@@ -3561,7 +3561,7 @@
               "Saturday: 9:00 AM – 6:00 PM",
               "Sunday: 9:00 AM – 6:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T10:00:00Z"
+            "nextCloseTime": "2026-10-15T10:00:00Z"
           }
         },
         {
@@ -3685,7 +3685,7 @@
               "Saturday: 9:00 AM – 6:00 PM",
               "Sunday: 9:00 AM – 6:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T10:00:00Z"
+            "nextCloseTime": "2026-10-15T10:00:00Z"
           }
         },
         {
@@ -3772,7 +3772,7 @@
               "Saturday: Closed",
               "Sunday: Closed"
             ],
-            "nextCloseTime": "2026-10-01T08:00:00Z"
+            "nextCloseTime": "2026-10-15T08:00:00Z"
           }
         },
         {
@@ -3871,7 +3871,7 @@
               "Saturday: 9:00 AM – 6:00 PM",
               "Sunday: 9:00 AM – 6:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T10:00:00Z"
+            "nextCloseTime": "2026-10-15T10:00:00Z"
           }
         },
         {
@@ -3970,7 +3970,7 @@
               "Saturday: 9:00 AM – 6:00 PM",
               "Sunday: 9:00 AM – 6:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T10:00:00Z"
+            "nextCloseTime": "2026-10-15T10:00:00Z"
           }
         },
         {
@@ -3985,7 +3985,7 @@
           },
           "formattedAddress": "HXQF+JXP, General Luna St, Intramuros, Manila, 1002 Metro Manila, Philippines",
           "regularOpeningHours": {
-            "openNow": false,
+            "openNow": true,
             "periods": [
               {
                 "open": {
@@ -4165,7 +4165,7 @@
               "Saturday: 8:00 AM – 12:00 PM, 1:00 – 5:00 PM",
               "Sunday: 8:00 AM – 12:00 PM, 1:00 – 5:00 PM"
             ],
-            "nextOpenTime": "2026-10-01T05:00:00Z"
+            "nextCloseTime": "2026-10-15T04:00:00Z"
           }
         },
         {
@@ -4279,7 +4279,7 @@
               "Saturday: 9:00 AM – 6:00 PM",
               "Sunday: 9:00 AM – 6:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T10:00:00Z"
+            "nextCloseTime": "2026-10-15T10:00:00Z"
           }
         },
         {
@@ -4378,7 +4378,7 @@
               "Saturday: 9:00 AM – 6:00 PM",
               "Sunday: 9:00 AM – 6:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T10:00:00Z"
+            "nextCloseTime": "2026-10-15T10:00:00Z"
           }
         },
         {
@@ -4477,7 +4477,7 @@
               "Saturday: 9:00 AM – 6:00 PM",
               "Sunday: 9:00 AM – 6:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T10:00:00Z"
+            "nextCloseTime": "2026-10-15T10:00:00Z"
           }
         },
         {
@@ -4576,7 +4576,7 @@
               "Saturday: 10:00 AM – 4:30 PM",
               "Sunday: 10:00 AM – 4:30 PM"
             ],
-            "nextCloseTime": "2026-10-01T08:30:00Z"
+            "nextCloseTime": "2026-10-15T08:30:00Z"
           }
         },
         {
@@ -4591,7 +4591,7 @@
           },
           "formattedAddress": "HXQF+JXP, General Luna St, Intramuros, Manila, 1002 Metro Manila, Philippines",
           "regularOpeningHours": {
-            "openNow": false,
+            "openNow": true,
             "periods": [
               {
                 "open": {
@@ -4771,7 +4771,7 @@
               "Saturday: 8:00 AM – 12:00 PM, 1:00 – 5:00 PM",
               "Sunday: 8:00 AM – 12:00 PM, 1:00 – 5:00 PM"
             ],
-            "nextOpenTime": "2026-10-01T05:00:00Z"
+            "nextCloseTime": "2026-10-15T04:00:00Z"
           }
         },
         {
@@ -4870,7 +4870,7 @@
               "Saturday: 9:00 AM – 6:00 PM",
               "Sunday: 9:00 AM – 6:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T10:00:00Z"
+            "nextCloseTime": "2026-10-15T10:00:00Z"
           }
         },
         {
@@ -4969,7 +4969,7 @@
               "Saturday: 9:00 AM – 5:00 PM",
               "Sunday: 9:00 AM – 5:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T09:00:00Z"
+            "nextCloseTime": "2026-10-15T09:00:00Z"
           }
         },
         {
@@ -5093,7 +5093,7 @@
               "Saturday: 9:00 AM – 6:00 PM",
               "Sunday: 9:00 AM – 6:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T10:00:00Z"
+            "nextCloseTime": "2026-10-15T10:00:00Z"
           }
         },
         {
@@ -5267,7 +5267,7 @@
               "Saturday: 9:00 AM – 5:00 PM",
               "Sunday: 9:00 AM – 5:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T09:00:00Z"
+            "nextCloseTime": "2026-10-15T09:00:00Z"
           }
         },
         {
@@ -5511,7 +5511,7 @@
               "Saturday: 10:00 AM – 12:00 AM",
               "Sunday: 10:00 AM – 12:00 AM"
             ],
-            "nextCloseTime": "2026-10-01T16:00:00Z"
+            "nextCloseTime": "2026-10-15T16:00:00Z"
           }
         },
         {
@@ -5681,7 +5681,7 @@
               "Saturday: 9:00 AM – 5:00 PM",
               "Sunday: 9:00 AM – 5:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T09:00:00Z"
+            "nextCloseTime": "2026-10-15T09:00:00Z"
           }
         },
         {
@@ -5909,7 +5909,7 @@
               "Saturday: Closed",
               "Sunday: Closed"
             ],
-            "nextCloseTime": "2026-10-01T09:00:00Z"
+            "nextCloseTime": "2026-10-15T09:00:00Z"
           }
         },
         {
@@ -5941,7 +5941,7 @@
         {
           "place_id": "ChIJeWcu0hfKlzMRnYOqfe-gowY",
           "displayName": {
-            "text": "Manila Cathedral",
+            "text": "Minor Basilica of the Immaculate Conception Manila",
             "languageCode": "en"
           },
           "location": {
@@ -6034,7 +6034,7 @@
               "Saturday: 8:00 AM – 4:30 PM",
               "Sunday: 8:00 – 11:30 AM"
             ],
-            "nextCloseTime": "2026-10-01T08:30:00Z"
+            "nextCloseTime": "2026-10-15T08:30:00Z"
           }
         },
         {
@@ -6068,7 +6068,7 @@
         {
           "place_id": "ChIJeWcu0hfKlzMRnYOqfe-gowY",
           "displayName": {
-            "text": "Manila Cathedral",
+            "text": "Minor Basilica of the Immaculate Conception Manila",
             "languageCode": "en"
           },
           "location": {
@@ -6161,7 +6161,7 @@
               "Saturday: 8:00 AM – 4:30 PM",
               "Sunday: 8:00 – 11:30 AM"
             ],
-            "nextCloseTime": "2026-10-01T08:30:00Z"
+            "nextCloseTime": "2026-10-15T08:30:00Z"
           }
         },
         {
@@ -6260,7 +6260,7 @@
               "Saturday: 8:00 AM – 5:00 PM",
               "Sunday: 8:00 AM – 5:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T09:00:00Z"
+            "nextCloseTime": "2026-10-15T09:00:00Z"
           }
         },
         {
@@ -6347,7 +6347,7 @@
               "Saturday: Closed",
               "Sunday: Closed"
             ],
-            "nextCloseTime": "2026-10-01T08:00:00Z"
+            "nextCloseTime": "2026-10-15T08:00:00Z"
           }
         },
         {
@@ -6541,7 +6541,7 @@
               "Saturday: 10:00 AM – 4:30 PM",
               "Sunday: 10:00 AM – 4:30 PM"
             ],
-            "nextCloseTime": "2026-10-01T08:30:00Z"
+            "nextCloseTime": "2026-10-15T08:30:00Z"
           }
         },
         {
@@ -6685,7 +6685,7 @@
               "Saturday: 9:00 AM – 5:00 PM",
               "Sunday: 9:00 AM – 5:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T09:00:00Z"
+            "nextCloseTime": "2026-10-15T09:00:00Z"
           }
         },
         {
@@ -6796,7 +6796,7 @@
               "Saturday: 9:00 AM – 3:00 PM",
               "Sunday: 9:00 AM – 3:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T07:00:00Z"
+            "nextCloseTime": "2026-10-15T07:00:00Z"
           }
         },
         {
@@ -6895,7 +6895,7 @@
               "Saturday: 9:00 AM – 6:00 PM",
               "Sunday: 9:00 AM – 6:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T10:00:00Z"
+            "nextCloseTime": "2026-10-15T10:00:00Z"
           }
         },
         {
@@ -6914,7 +6914,7 @@
         {
           "place_id": "ChIJeWcu0hfKlzMRnYOqfe-gowY",
           "displayName": {
-            "text": "Manila Cathedral",
+            "text": "Minor Basilica of the Immaculate Conception Manila",
             "languageCode": "en"
           },
           "location": {
@@ -7007,7 +7007,7 @@
               "Saturday: 8:00 AM – 4:30 PM",
               "Sunday: 8:00 – 11:30 AM"
             ],
-            "nextCloseTime": "2026-10-01T08:30:00Z"
+            "nextCloseTime": "2026-10-15T08:30:00Z"
           }
         },
         {
@@ -7118,7 +7118,7 @@
               "Saturday: 9:00 AM – 6:00 PM",
               "Sunday: 9:00 AM – 6:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T10:00:00Z"
+            "nextCloseTime": "2026-10-15T10:00:00Z"
           }
         },
         {
@@ -7135,36 +7135,114 @@
           "regularOpeningHours": null
         },
         {
-          "place_id": "ChIJMUp7NBbKlzMRqR_GBP8HBMk",
+          "place_id": "ChIJe2YduJPLlzMRIgRI7HS0F8k",
           "displayName": {
-            "text": "Plaza Roma",
+            "text": "Manila Cooking Class and Crafting Class",
             "languageCode": "en"
           },
           "location": {
-            "latitude": 14.5921283,
-            "longitude": 120.97307359999998
+            "latitude": 14.589406799999999,
+            "longitude": 120.97546080000001
           },
-          "formattedAddress": "HXRF+V64, Intramuros, Manila, 1002 Metro Manila, Philippines",
+          "formattedAddress": "Stall 3F, Plaza San Luis Complex, General Luna St, Intramuros, Manila, 1002 Metro Manila, Philippines",
           "regularOpeningHours": {
             "openNow": true,
             "periods": [
               {
                 "open": {
                   "day": 0,
-                  "hour": 0,
+                  "hour": 9,
+                  "minute": 0
+                },
+                "close": {
+                  "day": 0,
+                  "hour": 18,
+                  "minute": 0
+                }
+              },
+              {
+                "open": {
+                  "day": 1,
+                  "hour": 9,
+                  "minute": 0
+                },
+                "close": {
+                  "day": 1,
+                  "hour": 18,
+                  "minute": 0
+                }
+              },
+              {
+                "open": {
+                  "day": 2,
+                  "hour": 9,
+                  "minute": 0
+                },
+                "close": {
+                  "day": 2,
+                  "hour": 18,
+                  "minute": 0
+                }
+              },
+              {
+                "open": {
+                  "day": 3,
+                  "hour": 9,
+                  "minute": 0
+                },
+                "close": {
+                  "day": 3,
+                  "hour": 18,
+                  "minute": 0
+                }
+              },
+              {
+                "open": {
+                  "day": 4,
+                  "hour": 9,
+                  "minute": 0
+                },
+                "close": {
+                  "day": 4,
+                  "hour": 18,
+                  "minute": 0
+                }
+              },
+              {
+                "open": {
+                  "day": 5,
+                  "hour": 9,
+                  "minute": 0
+                },
+                "close": {
+                  "day": 5,
+                  "hour": 18,
+                  "minute": 0
+                }
+              },
+              {
+                "open": {
+                  "day": 6,
+                  "hour": 9,
+                  "minute": 0
+                },
+                "close": {
+                  "day": 6,
+                  "hour": 18,
                   "minute": 0
                 }
               }
             ],
             "weekdayDescriptions": [
-              "Monday: Open 24 hours",
-              "Tuesday: Open 24 hours",
-              "Wednesday: Open 24 hours",
-              "Thursday: Open 24 hours",
-              "Friday: Open 24 hours",
-              "Saturday: Open 24 hours",
-              "Sunday: Open 24 hours"
-            ]
+              "Monday: 9:00 AM – 6:00 PM",
+              "Tuesday: 9:00 AM – 6:00 PM",
+              "Wednesday: 9:00 AM – 6:00 PM",
+              "Thursday: 9:00 AM – 6:00 PM",
+              "Friday: 9:00 AM – 6:00 PM",
+              "Saturday: 9:00 AM – 6:00 PM",
+              "Sunday: 9:00 AM – 6:00 PM"
+            ],
+            "nextCloseTime": "2026-10-15T10:00:00Z"
           }
         }
       ],
@@ -7277,7 +7355,7 @@
               "Saturday: 8:00 AM – 11:00 PM",
               "Sunday: 8:00 AM – 11:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T15:00:00Z"
+            "nextCloseTime": "2026-10-15T15:00:00Z"
           }
         },
         {
@@ -7388,13 +7466,13 @@
               "Saturday: 10:00 AM – 12:00 AM",
               "Sunday: 10:00 AM – 12:00 AM"
             ],
-            "nextCloseTime": "2026-10-01T16:00:00Z"
+            "nextCloseTime": "2026-10-15T16:00:00Z"
           }
         },
         {
           "place_id": "ChIJeWcu0hfKlzMRnYOqfe-gowY",
           "displayName": {
-            "text": "Manila Cathedral",
+            "text": "Minor Basilica of the Immaculate Conception Manila",
             "languageCode": "en"
           },
           "location": {
@@ -7487,7 +7565,7 @@
               "Saturday: 8:00 AM – 4:30 PM",
               "Sunday: 8:00 – 11:30 AM"
             ],
-            "nextCloseTime": "2026-10-01T08:30:00Z"
+            "nextCloseTime": "2026-10-15T08:30:00Z"
           }
         },
         {
@@ -7619,7 +7697,7 @@
               "Saturday: 8:00 AM – 5:00 PM",
               "Sunday: 8:00 AM – 5:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T09:00:00Z"
+            "nextCloseTime": "2026-10-15T09:00:00Z"
           }
         },
         {
@@ -7718,7 +7796,7 @@
               "Saturday: 9:00 AM – 6:00 PM",
               "Sunday: 9:00 AM – 6:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T10:00:00Z"
+            "nextCloseTime": "2026-10-15T10:00:00Z"
           }
         },
         {
@@ -7829,7 +7907,7 @@
               "Saturday: 8:00 AM – 5:00 PM",
               "Sunday: 8:00 AM – 5:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T09:00:00Z"
+            "nextCloseTime": "2026-10-15T09:00:00Z"
           }
         },
         {
@@ -7940,7 +8018,7 @@
               "Saturday: 9:00 AM – 6:00 PM",
               "Sunday: 9:00 AM – 6:00 PM"
             ],
-            "nextCloseTime": "2026-10-01T10:00:00Z"
+            "nextCloseTime": "2026-10-15T10:00:00Z"
           }
         },
         {
@@ -8027,7 +8105,7 @@
               "Saturday: Closed",
               "Sunday: Closed"
             ],
-            "nextCloseTime": "2026-10-01T09:00:00Z"
+            "nextCloseTime": "2026-10-15T09:00:00Z"
           }
         },
         {
